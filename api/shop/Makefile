@@ -83,7 +83,7 @@ deploy: push
 
 
 # =================================================================
-# apiリクエストする時用のやつ
+# apiリクエストする時用のやつ（dev）
 # =================================================================
 .PHONY: api-all-request
 sleep:
@@ -208,3 +208,48 @@ get-charge-histories:
 	curl -sX 'GET' \
 		'http://localhost:8080/shop/v1/payments/charges/histories?offset=0&limit=10' \
 		-H 'accept: application/json' | jq .
+
+
+# =================================================================
+# apiリクエストする時用のやつ（stg）
+# =================================================================
+AWS_API_v1_DOMAIN := <api.domain>
+
+stg-api-all-request: stg-healthcheck sleep \
+	stg-create-user sleep \
+	stg-get-me sleep \
+	stg-create-reservations sleep \
+	stg-create-charge sleep
+
+.PHONY: stg-healthcheck
+stg-healthcheck:
+	curl -i -X 'GET' \
+		'https://${AWS_API_v1_DOMAIN}/shop/v1/healthcheck' \
+		-H 'accept: application/json'
+
+.PHONY: stg-create-user stg-get-me stg-create-product-comment
+stg-create-user:
+	curl -i -X 'POST' \
+		'https://${AWS_API_v1_DOMAIN}/shop/v1/users' \
+		-H 'accept: application/json' \
+		-d ''
+
+stg-get-me:
+	curl -i -X 'GET' \
+		'https://${AWS_API_v1_DOMAIN}/shop/v1/users/me' \
+		-H 'accept: application/json'
+
+.PHONY: stg-create-reservations stg-create-charge
+stg-create-reservations:
+	curl -i -sX 'POST' \
+		'https://${AWS_API_v1_DOMAIN}/shop/v1/payments/reservations' \
+		-H 'accept: application/json' \
+		-H 'Content-Type: application/json' \
+		-d '[{"product_id": 10001001, "quantity": 2}, {"product_id": 10001002, "quantity": 3}]'
+
+stg-create-charge:
+	curl -i -sX 'POST' \
+		'https://${AWS_API_v1_DOMAIN}/shop/v1/payments/charges' \
+		-H 'accept: application/json' \
+		-H 'Content-Type: application/json' \
+		-d '{"reservation_id": "9f9213b2-9687-6910-d2ec-3a247582be2d"}'
