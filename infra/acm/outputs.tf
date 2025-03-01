@@ -7,7 +7,7 @@ output "acm" {
 }
 
 output "shop_apigatewayv2_domain_name" {
-  description = "Details of the api gateway v2 custom domain name configuration"
+  description = "details of the api gateway v2 custom domain name configuration."
   value = {
     id              = aws_apigatewayv2_domain_name.shop_api_v1.id
     domain_name     = aws_apigatewayv2_domain_name.shop_api_v1.domain_name

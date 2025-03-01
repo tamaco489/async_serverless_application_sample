@@ -14,7 +14,6 @@ resource "aws_acm_certificate" "async_serverless_app" {
   }
 }
 
-# API Gateway カスタムドメイン
 resource "aws_apigatewayv2_domain_name" "shop_api_v1" {
   domain_name = "apiv1.${data.terraform_remote_state.route53.outputs.host_zone.name}"
 
@@ -25,7 +24,6 @@ resource "aws_apigatewayv2_domain_name" "shop_api_v1" {
   }
 }
 
-# Route53 Aレコード
 resource "aws_route53_record" "shop_api_v1" {
   zone_id = data.terraform_remote_state.route53.outputs.host_zone.id
   name    = "apiv1.${data.terraform_remote_state.route53.outputs.host_zone.name}"
