@@ -9,7 +9,6 @@ import (
 
 func (c *Controllers) GetCreditCards(ctx *gin.Context, request gen.GetCreditCardsRequestObject) (gen.GetCreditCardsResponseObject, error) {
 
-	// NOTE: 外部APIを実行する想定であるため、2000ms(2秒) 遅延させる。
 	time.Sleep(2000 * time.Millisecond)
 
 	creditCards := []gen.CreditCardList{

@@ -9,7 +9,6 @@ import (
 
 func (c *Controllers) CreateCustomer(ctx *gin.Context, request gen.CreateCustomerRequestObject) (gen.CreateCustomerResponseObject, error) {
 
-	// NOTE: 外部APIを実行する想定であるため、150ms遅延させる。
 	time.Sleep(150 * time.Millisecond)
 
 	return gen.CreateCustomer201JSONResponse{

@@ -20,7 +20,8 @@ func NewHShopAPIServer() (*http.Server, error) {
 	r.Use(cors.New(corsCnf))
 	r.Use(gin.Recovery())
 
-	apiController := NewControllers(configuration.Get().API.Env)
+	cnf := configuration.Get()
+	apiController := NewControllers(cnf.API.Env)
 	strictServer := gen.NewStrictHandler(apiController, nil)
 
 	gen.RegisterHandlersWithOptions(
@@ -36,11 +37,9 @@ func NewHShopAPIServer() (*http.Server, error) {
 		},
 	)
 
-	// NOTE: portは一旦固定値で渡す
-	port := "8080"
 	server := &http.Server{
 		Handler: r,
-		Addr:    fmt.Sprintf(":%s", port),
+		Addr:    fmt.Sprintf(":%s", cnf.API.Port),
 	}
 
 	return server, nil

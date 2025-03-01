@@ -9,7 +9,6 @@ import (
 
 func (c *Controllers) GetCustomerByUserID(ctx *gin.Context, request gen.GetCustomerByUserIDRequestObject) (gen.GetCustomerByUserIDResponseObject, error) {
 
-	// NOTE: 外部APIを実行する想定であるため、400ms遅延させる。
 	time.Sleep(400 * time.Millisecond)
 
 	return gen.GetCustomerByUserID200JSONResponse{

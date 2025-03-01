@@ -9,7 +9,6 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
-// CreateReservation: 予約作成APIは商品情報等をひとまとめにして、ランダムなUUIDを生成する。
 func (c *Controllers) CreateReservation(ctx *gin.Context, request gen.CreateReservationRequestObject) (gen.CreateReservationResponseObject, error) {
 
 	err := validation.Validate(request.Body,
