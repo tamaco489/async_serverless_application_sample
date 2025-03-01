@@ -1,23 +1,54 @@
 package controller
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/tamaco489/async_serverless_application_sample/api/shop/internal/gen"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 // CreateReservation: 予約作成APIは商品情報等をひとまとめにして、ランダムなUUIDを生成する。
 func (c *Controllers) CreateReservation(ctx *gin.Context, request gen.CreateReservationRequestObject) (gen.CreateReservationResponseObject, error) {
 
-	// NOTE: マスタ情報を参照し、且つ在庫チェックや排他制御を伴う処理を想定。負荷テストのシナリオ的にややレイテンシのあるAPIとする。
-	time.Sleep(300 * time.Millisecond)
+	err := validation.Validate(request.Body,
+		validation.Required,
+		validation.By(validateReservationRequest),
+	)
+	if err != nil {
+		_ = ctx.Error(err)
+		return gen.CreateCharge400Response{}, nil
+	}
 
-	// NOTE: 予約IDは一旦ランダムなUUIDのみを返す実装にする。
-	reservationID := uuid.New().String()
+	res, err := c.reservationUseCase.CreateReservation(ctx, request)
+	if err != nil {
+		return gen.CreateReservation500Response{}, err
+	}
 
-	return gen.CreateReservation201JSONResponse{
-		ReservationId: reservationID,
-	}, nil
+	return res, nil
+}
+
+func validateReservationRequest(value interface{}) error {
+
+	const MinProductID, MaxProductID = 1, 99999999
+	const MinQuantity, MaxQuantity = 1, 10
+
+	reservations, ok := value.(*gen.CreateReservationJSONRequestBody)
+	if !ok {
+		return fmt.Errorf("invalid request format")
+	}
+	if len(*reservations) == 0 {
+		return fmt.Errorf("request body must contain at least one reservation item")
+	}
+
+	for _, item := range *reservations {
+		if item.ProductId < MinProductID || item.ProductId > MaxProductID {
+			return fmt.Errorf("product_id must be between %d and %d", MinProductID, MaxProductID)
+		}
+		if item.Quantity < MinQuantity || item.Quantity > MaxQuantity {
+			return fmt.Errorf("quantity must be between %d and %d", MinQuantity, MaxQuantity)
+		}
+	}
+	return nil
 }

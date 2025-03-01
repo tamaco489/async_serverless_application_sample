@@ -189,11 +189,11 @@ delete-credit-card:
 # 予約系API
 .PHONY: create-reservations
 create-reservations:
-	curl -sX 'POST' \
+	curl -i -sX 'POST' \
 		'http://localhost:8080/shop/v1/payments/reservations' \
 		-H 'accept: application/json' \
 		-H 'Content-Type: application/json' \
-		-d '[{"product_id": 10001001, "quantity": 2}, {"product_id": 10001002, "quantity": 3}]' | jq .
+		-d '[{"product_id": 10001001, "quantity": 2}, {"product_id": 10001002, "quantity": 3}]'
 
 # 注文系API
 .PHONY: create-charge get-charge-histories
