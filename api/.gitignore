@@ -29,9 +29,6 @@ go.work
 ### build ###
 shop_api
 
-### volume ###
-shop/docker/opensearch/*
-
 ### common ###
 .env
 tmp
