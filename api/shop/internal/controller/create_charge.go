@@ -1,16 +1,29 @@
 package controller
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/tamaco489/async_serverless_application_sample/api/shop/internal/gen"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
 )
 
 func (c *Controllers) CreateCharge(ctx *gin.Context, request gen.CreateChargeRequestObject) (gen.CreateChargeResponseObject, error) {
 
-	// NOTE: 外部APIを実行する想定であるため、1000ms遅延させる。
-	time.Sleep(1000 * time.Millisecond)
+	err := validation.ValidateStruct(request.Body,
+		validation.Field(
+			&request.Body.ReservationId,
+			validation.Required,
+		),
+	)
+	if err != nil {
+		_ = ctx.Error(err)
+		return gen.CreateCharge400Response{}, nil
+	}
 
-	return gen.CreateCharge204Response{}, nil
+	res, err := c.chargeUseCase.CreateCharge(ctx, request)
+	if err != nil {
+		return gen.CreateCharge500Response{}, err
+	}
+
+	return res, nil
 }
