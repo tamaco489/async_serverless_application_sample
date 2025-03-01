@@ -200,7 +200,7 @@ create-reservations:
 create-charge:
 	curl -i -sX 'POST' \
 		'http://localhost:8080/shop/v1/payments/charges' \
-		-H 'accept: */*' \
+		-H 'accept: application/json' \
 		-H 'Content-Type: application/json' \
 		-d '{"reservation_id": "9f9213b2-9687-6910-d2ec-3a247582be2d"}'
 
