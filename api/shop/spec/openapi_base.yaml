@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: opensearch demo API
+  title: async serverless application API
   description: |-
-    opensearch demo API
+    async serverless application API
   version: 1.0.0
 servers:
   - url: 'http://localhost:{port}/shop/'
