@@ -21,3 +21,11 @@ data "terraform_remote_state" "network" {
     key    = "network/terraform.tfstate"
   }
 }
+
+data "terraform_remote_state" "sqs" {
+  backend = "s3"
+  config = {
+    bucket = "${var.env}-async-serverless-application-tfstate"
+    key    = "sqs/push_notification/terraform.tfstate"
+  }
+}
