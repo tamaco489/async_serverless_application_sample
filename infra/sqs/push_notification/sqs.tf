@@ -1,16 +1,16 @@
 resource "aws_sqs_queue" "push_notification_queue" {
   name                       = "${local.fqn}-queue"
   fifo_queue                 = false
-  max_message_size           = 256 * 1024       # 256KB
-  visibility_timeout_seconds = 15 * 60          # 15分（900秒）
-  message_retention_seconds  = 4 * 24 * 60 * 60 # 4日間（345600秒）
+  max_message_size           = local.queue_max_message_size
+  visibility_timeout_seconds = local.queue_visibility_timeout_seconds
+  message_retention_seconds  = local.queue_message_retention_seconds
   delay_seconds              = 0
   receive_wait_time_seconds  = 0
   sqs_managed_sse_enabled    = false
 
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.push_notification_dlq.arn
-    maxReceiveCount     = 5
+    maxReceiveCount     = local.max_receive_count
   })
 
   tags = {
@@ -23,9 +23,9 @@ resource "aws_sqs_queue" "push_notification_queue" {
 resource "aws_sqs_queue" "push_notification_dlq" {
   name                       = "${local.fqn}-dlq"
   fifo_queue                 = false
-  max_message_size           = 256 * 1024       # 256KB
-  visibility_timeout_seconds = 15 * 60          # 15分（900秒）
-  message_retention_seconds  = 7 * 24 * 60 * 60 # 7日間（604800秒）
+  max_message_size           = local.dlq_max_message_size
+  visibility_timeout_seconds = local.dlq_visibility_timeout_seconds
+  message_retention_seconds  = local.dlq_message_retention_seconds
   delay_seconds              = 0
   receive_wait_time_seconds  = 0
   sqs_managed_sse_enabled    = false
