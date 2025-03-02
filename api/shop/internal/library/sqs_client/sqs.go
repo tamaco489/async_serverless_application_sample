@@ -14,7 +14,7 @@ type SQSClient struct {
 	Client *sqs.Client
 }
 
-func NewSQSClient(ctx context.Context, cfg aws.Config, env string) (*SQSClient, error) {
+func NewSQSClient(cfg aws.Config, env string) (*SQSClient, error) {
 
 	var client *sqs.Client
 
@@ -27,6 +27,9 @@ func NewSQSClient(ctx context.Context, cfg aws.Config, env string) (*SQSClient, 
 
 	case "stg":
 		client = sqs.NewFromConfig(cfg)
+
+	default:
+		return nil, fmt.Errorf("unsupported environment: %v", env)
 	}
 
 	if client == nil {

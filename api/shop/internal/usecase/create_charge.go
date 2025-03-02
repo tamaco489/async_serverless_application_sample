@@ -1,7 +1,9 @@
 package usecase
 
 import (
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,16 +17,26 @@ func (u *chargeUseCase) CreateCharge(ctx *gin.Context, request gen.CreateChargeR
 
 	time.Sleep(1000 * time.Millisecond)
 
-	// 注文IDを生成
+	// order_idを生成
 	orderID := uuid.New().String()
 
-	queueMsgBody := sqs_client.PurchaseQueueMessage{
-		UserID:  10010024,
-		OrderID: orderID,
-		Status:  sqs_client.PurchaseStatusCompleted,
+	// user_idを生成（10010001 ~ 3000000までのランダムな数値を設定する）
+	diff := new(big.Int).Sub(new(big.Int).SetUint64(30000000), new(big.Int).SetUint64(10010001))
+	uid, err := rand.Int(rand.Reader, diff)
+	if err != nil {
+		return gen.CreateCharge500Response{}, fmt.Errorf("error generating rand: %v", err)
 	}
 
-	sqsClient, err := sqs_client.NewSQSClient(ctx.Request.Context(), configuration.Get().AWSConfig, configuration.Get().API.Env)
+	// 注文ステータスをランダムに設定
+	purchaseStatus := sqs_client.GetRandomPurchaseStatus()
+
+	queueMsgBody := sqs_client.PurchaseQueueMessage{
+		UserID:  uid.Uint64(),
+		OrderID: orderID,
+		Status:  purchaseStatus,
+	}
+
+	sqsClient, err := sqs_client.NewSQSClient(configuration.Get().AWSConfig, configuration.Get().API.Env)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create sqs client: %v", err)
 	}

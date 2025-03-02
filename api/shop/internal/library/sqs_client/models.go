@@ -1,5 +1,9 @@
 package sqs_client
 
+import (
+	"math/rand/v2"
+)
+
 type PurchaseStatus string
 
 const (
@@ -12,7 +16,21 @@ const (
 
 // SQSに送信するキューの構造体
 type PurchaseQueueMessage struct {
-	UserID  int            `json:"user_id"`
+	UserID  uint64         `json:"user_id"`
 	OrderID string         `json:"order_id"`
 	Status  PurchaseStatus `json:"status"`
+}
+
+// ランダムなPurchaseStatusを返す関数（検証目的です）
+func GetRandomPurchaseStatus() PurchaseStatus {
+	statuses := []PurchaseStatus{
+		PurchaseStatusPending,
+		PurchaseStatusProcessing,
+		PurchaseStatusCompleted,
+		PurchaseStatusFailed,
+		PurchaseStatusCancelled,
+	}
+
+	randomIndex := rand.IntN(len(statuses))
+	return statuses[randomIndex]
 }
