@@ -17,7 +17,7 @@ variable "feature" {
 }
 
 variable "queue_config" {
-  description = "Configuration for the push notification queue"
+  description = "The push notification queue config"
   type = object({
     max_message_size_kb        = number
     visibility_timeout_minutes = number
@@ -33,7 +33,7 @@ variable "queue_config" {
 }
 
 variable "dlq_config" {
-  description = "Configuration for the push notification DLQ"
+  description = "The push notification dlq config"
   type = object({
     max_message_size_kb        = number
     visibility_timeout_minutes = number
