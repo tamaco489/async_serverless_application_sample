@@ -16,6 +16,12 @@ variable "product" {
   default     = "shop"
 }
 
+variable "feature" {
+  description = "The service name"
+  type        = string
+  default     = "push-notification"
+}
+
 locals {
-  fqn = "${var.env}-${var.product}"
+  fqn = "${var.env}-${var.project}"
 }
