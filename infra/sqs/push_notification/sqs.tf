@@ -17,7 +17,7 @@ resource "aws_sqs_queue" "push_notification_queue" {
   delay_seconds = 0
 
   # ロングポーリングの待機時間。秒単位で設定。（0の場合、即時レスポンスとなる）
-  receive_wait_time_seconds = 0
+  receive_wait_time_seconds = 20
 
   # SQSマネージドサーバーサイド暗号化（SSE）を有効にするかどうか
   sqs_managed_sse_enabled = false
