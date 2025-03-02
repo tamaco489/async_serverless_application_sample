@@ -11,8 +11,7 @@ import (
 	"github.com/tamaco489/async_serverless_application_sample/api/shop/internal/library/logger"
 )
 
-func NewHShopAPIServer() (*http.Server, error) {
-
+func NewShopAPIServer(cnf configuration.Config) (*http.Server, error) {
 	corsCnf := NewCorsConfig()
 
 	r := gin.New()
@@ -20,8 +19,7 @@ func NewHShopAPIServer() (*http.Server, error) {
 	r.Use(cors.New(corsCnf))
 	r.Use(gin.Recovery())
 
-	cnf := configuration.Get()
-	apiController := NewControllers(cnf.API.Env)
+	apiController := NewControllers(cnf)
 	strictServer := gen.NewStrictHandler(apiController, nil)
 
 	gen.RegisterHandlersWithOptions(

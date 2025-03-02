@@ -16,13 +16,13 @@ import (
 
 func main() {
 	ctx := context.Background()
-	_, err := configuration.Load(ctx)
+	cnf, err := configuration.Load(ctx)
 	if err != nil {
 		slog.Error("Failed to read configuration", "error", err)
 		panic(err)
 	}
 
-	server, err := controller.NewHShopAPIServer()
+	server, err := controller.NewShopAPIServer(cnf)
 	if err != nil {
 		panic(err)
 	}
