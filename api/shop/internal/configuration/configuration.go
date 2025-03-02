@@ -23,9 +23,7 @@ type Config struct {
 	AWSConfig aws.Config
 }
 
-func Get() Config {
-	return globalConfig
-}
+func Get() Config { return globalConfig }
 
 func Load(ctx context.Context) (Config, error) {
 	envconfig.MustProcess("", &globalConfig)
