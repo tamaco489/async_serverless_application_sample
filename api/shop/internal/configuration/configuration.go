@@ -16,6 +16,9 @@ type Config struct {
 		Port        string `envconfig:"API_PORT" default:"8080"`
 		ServiceName string `envconfig:"API_SERVICE_NAME" default:"shop-api"`
 	}
+	SQS struct {
+		PushNotificationURL string `envconfig:"SQS_PUSH_NOTIFICATION_URL"`
+	}
 	Logging   string `envconfig:"LOGGING" default:"off"`
 	AWSConfig aws.Config
 }
@@ -32,10 +35,6 @@ func Load(ctx context.Context) (Config, error) {
 	if err := loadAWSConf(ctx); err != nil {
 		return globalConfig, err
 	}
-	// NOTE: secret情報を管理する必要になったら実装する
-	// if err := loadSecrets(ctx, globalConfig); err != nil {
-	// 	return globalConfig, err
-	// }
 
 	return globalConfig, nil
 }

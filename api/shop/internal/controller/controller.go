@@ -1,19 +1,32 @@
 package controller
 
-import "github.com/tamaco489/async_serverless_application_sample/api/shop/internal/usecase"
+import (
+	"fmt"
+
+	"github.com/tamaco489/async_serverless_application_sample/api/shop/internal/configuration"
+	"github.com/tamaco489/async_serverless_application_sample/api/shop/internal/library/sqs_client"
+	"github.com/tamaco489/async_serverless_application_sample/api/shop/internal/usecase"
+)
 
 type Controllers struct {
-	env                string
+	config             configuration.Config
 	chargeUseCase      usecase.IChargeUseCase
 	reservationUseCase usecase.IReservationUseCase
 }
 
-func NewControllers(env string) *Controllers {
-	chargeUseCase := usecase.NewChargeUseCase()
+func NewControllers(cnf configuration.Config) (*Controllers, error) {
+
+	sqsClient, err := sqs_client.NewSQSClient(cnf.AWSConfig, cnf.API.Env)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create sqs client: %v", err)
+	}
+
+	chargeUseCase := usecase.NewChargeUseCase(sqsClient)
 	reservationUseCase := usecase.NewReservationUseCase()
+
 	return &Controllers{
-		env,
+		cnf,
 		chargeUseCase,
 		reservationUseCase,
-	}
+	}, nil
 }

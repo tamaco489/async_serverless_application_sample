@@ -19,9 +19,10 @@ resource "aws_lambda_function" "shop_api" {
 
   environment {
     variables = {
-      API_SERVICE_NAME = "shop-api"
-      API_ENV          = "stg"
-      API_PORT         = "8080"
+      API_SERVICE_NAME          = "shop-api"
+      API_ENV                   = "stg"
+      API_PORT                  = "8080"
+      SQS_PUSH_NOTIFICATION_URL = data.terraform_remote_state.sqs.outputs.push_notification_queue.id
     }
   }
 
