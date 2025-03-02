@@ -19,7 +19,11 @@ func NewShopAPIServer(cnf configuration.Config) (*http.Server, error) {
 	r.Use(cors.New(corsCnf))
 	r.Use(gin.Recovery())
 
-	apiController := NewControllers(cnf)
+	apiController, err := NewControllers(cnf)
+	if err != nil {
+		return nil, fmt.Errorf("failed to new controllers %v", err)
+	}
+
 	strictServer := gen.NewStrictHandler(apiController, nil)
 
 	gen.RegisterHandlersWithOptions(

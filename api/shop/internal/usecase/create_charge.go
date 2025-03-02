@@ -36,13 +36,8 @@ func (u *chargeUseCase) CreateCharge(ctx *gin.Context, request gen.CreateChargeR
 		Status:  purchaseStatus,
 	}
 
-	sqsClient, err := sqs_client.NewSQSClient(configuration.Get().AWSConfig, configuration.Get().API.Env)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create sqs client: %v", err)
-	}
-
 	if configuration.Get().API.Env != "dev" {
-		if err := sqsClient.SendPurchaseMessage(
+		if err := u.sqsClient.SendPurchaseMessage(
 			ctx.Request.Context(),
 			configuration.Get().SQS.PushNotificationURL,
 			queueMsgBody,
