@@ -1,6 +1,3 @@
-# AWS Lambdaが指定されたロールを引き受けるためのポリシードキュメントを生成する
-# そのロールに付与された権限を使用できるようにするために必要な設定
-# これにより、Lambda関数が特定のAWSリソースにアクセスするために必要な権限を持つことができるようになる
 data "aws_iam_policy_document" "lambda_execution_assume_role" {
   statement {
     effect = "Allow"
@@ -12,7 +9,6 @@ data "aws_iam_policy_document" "lambda_execution_assume_role" {
   }
 }
 
-# IAM Roleの作成
 resource "aws_iam_role" "push_notification_batch" {
   name               = "${local.fqn}-batch-iam-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_execution_assume_role.json
