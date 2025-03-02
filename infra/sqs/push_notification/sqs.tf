@@ -26,7 +26,7 @@ resource "aws_sqs_queue" "push_notification_queue" {
     # DLQのARNを指定
     deadLetterTargetArn = aws_sqs_queue.push_notification_dlq.arn
 
-    # リトライ回数を5回に設定
+    # リトライ回数の設定。メッセージが繰り返し処理に失敗する場合に、無限ループを防ぐ
     maxReceiveCount = local.max_receive_count
   })
 
