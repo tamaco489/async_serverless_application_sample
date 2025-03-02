@@ -14,7 +14,7 @@ func PushNotificationHandler(job usecase.Job) func(ctx context.Context, sqsEvent
 	return func(ctx context.Context, sqsEvent events.SQSEvent) error {
 
 		for _, record := range sqsEvent.Records {
-			var message interface{}
+			var message sqsMessage
 			if err := json.Unmarshal([]byte(record.Body), &message); err != nil {
 				slog.ErrorContext(ctx, "failed to unmarshal message", slog.String("error", err.Error()))
 				return err
