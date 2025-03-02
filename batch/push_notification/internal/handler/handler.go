@@ -12,7 +12,6 @@ import (
 type SQSEventJob func(ctx context.Context, sqsEvent events.SQSEvent) error
 
 func PushNotificationHandler(job usecase.Job) SQSEventJob {
-
 	return func(ctx context.Context, sqsEvent events.SQSEvent) error {
 
 		for _, record := range sqsEvent.Records {
@@ -31,7 +30,6 @@ func PushNotificationHandler(job usecase.Job) SQSEventJob {
 
 			case PurchaseStatusFailed:
 				slog.InfoContext(ctx, "message processing failed", slog.Any("message", message))
-				//
 
 			default:
 				slog.InfoContext(ctx, "skip message processing", slog.Any("message", message))
