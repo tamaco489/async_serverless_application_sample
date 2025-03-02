@@ -9,7 +9,9 @@ import (
 	"github.com/tamaco489/async_serverless_application_sample/batch/push_notification/internal/usecase"
 )
 
-func PushNotificationHandler(job usecase.Job) func(ctx context.Context, sqsEvent events.SQSEvent) error {
+type SQSEventJob func(ctx context.Context, sqsEvent events.SQSEvent) error
+
+func PushNotificationHandler(job usecase.Job) SQSEventJob {
 
 	return func(ctx context.Context, sqsEvent events.SQSEvent) error {
 
@@ -22,7 +24,7 @@ func PushNotificationHandler(job usecase.Job) func(ctx context.Context, sqsEvent
 
 			switch message.Status {
 			case PurchaseStatusCompleted:
-				if err := job.ProcessMessage(ctx, message); err != nil {
+				if err := job.SendPushNotificationPurchaseCompleted(ctx); err != nil {
 					slog.ErrorContext(ctx, "failed to process message", slog.String("error", err.Error()))
 					return err
 				}
