@@ -32,4 +32,5 @@ func main() {
 	}
 
 	lambda.Start(handler.PushNotificationHandler(*job))
+	lambda.Start(handler.TimeoutMiddleware(handler.PushNotificationHandler(*job)))
 }
