@@ -13,6 +13,7 @@ type IChargeUseCase interface {
 type IReservationUseCase interface {
 	CreateReservation(ctx *gin.Context, request gen.CreateReservationRequestObject) (gen.CreateReservationResponseObject, error)
 }
+
 type chargeUseCase struct{ sqsClient *sqs_client.SQSClient }
 
 type reservationUseCase struct{}
