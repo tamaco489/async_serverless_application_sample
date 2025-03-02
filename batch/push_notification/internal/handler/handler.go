@@ -14,15 +14,25 @@ func PushNotificationHandler(job usecase.Job) func(ctx context.Context, sqsEvent
 	return func(ctx context.Context, sqsEvent events.SQSEvent) error {
 
 		for _, record := range sqsEvent.Records {
-			var message sqsMessage
+			var message purchaseQueueMessage
 			if err := json.Unmarshal([]byte(record.Body), &message); err != nil {
 				slog.ErrorContext(ctx, "failed to unmarshal message", slog.String("error", err.Error()))
 				return err
 			}
 
-			if err := job.ProcessMessage(ctx, message); err != nil {
-				slog.ErrorContext(ctx, "failed to process message", slog.String("error", err.Error()))
-				return err
+			switch message.Status {
+			case PurchaseStatusCompleted:
+				if err := job.ProcessMessage(ctx, message); err != nil {
+					slog.ErrorContext(ctx, "failed to process message", slog.String("error", err.Error()))
+					return err
+				}
+
+			case PurchaseStatusFailed:
+				slog.InfoContext(ctx, "message processing failed", slog.Any("message", message))
+				//
+
+			default:
+				slog.InfoContext(ctx, "skip message processing", slog.Any("message", message))
 			}
 		}
 		return nil
