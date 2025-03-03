@@ -1,16 +1,33 @@
 resource "aws_sqs_queue" "push_notification_queue" {
-  name                       = "${local.fqn}-queue"
-  fifo_queue                 = false
-  max_message_size           = local.queue_max_message_size
+  name = "${local.fqn}-queue"
+
+  # 標準Queueとして定義（順序を考慮しない）
+  fifo_queue = false
+
+  # 最大メッセージサイズ
+  max_message_size = local.queue_max_message_size
+
+  # キューの可視性タイムアウト。秒単位で設定。（指定した期間中は他のコンシューマーはキューを参照することができない）
   visibility_timeout_seconds = local.queue_visibility_timeout_seconds
-  message_retention_seconds  = local.queue_message_retention_seconds
-  delay_seconds              = 0
-  receive_wait_time_seconds  = 0
-  sqs_managed_sse_enabled    = false
+
+  # メッセージの保持時間、秒単位で設定
+  message_retention_seconds = local.queue_message_retention_seconds
+
+  # キュー内の全メッセージの配送を遅延させる時間、秒単位で設定。（30秒で設定した場合、キューに送信してもLambda30秒間はこのキューを見ることができない。※0の場合は即時配信となる）
+  delay_seconds = 0
+
+  # ロングポーリングの待機時間。秒単位で設定。（0の場合、即時レスポンスとなる）
+  receive_wait_time_seconds = 20
+
+  # SQSマネージドサーバーサイド暗号化（SSE）を有効にするかどうか
+  sqs_managed_sse_enabled = false
 
   redrive_policy = jsonencode({
+    # DLQのARNを指定
     deadLetterTargetArn = aws_sqs_queue.push_notification_dlq.arn
-    maxReceiveCount     = local.max_receive_count
+
+    # リトライ回数の設定。メッセージが繰り返し処理に失敗する場合に、無限ループを防ぐ
+    maxReceiveCount = local.max_receive_count
   })
 
   tags = {
@@ -20,6 +37,7 @@ resource "aws_sqs_queue" "push_notification_queue" {
   }
 }
 
+# DLQの設定
 resource "aws_sqs_queue" "push_notification_dlq" {
   name                       = "${local.fqn}-dlq"
   fifo_queue                 = false
