@@ -13,9 +13,12 @@ import (
 
 func batchGetSecrets(ctx context.Context, cfg aws.Config, secrets map[string]any) error {
 	svc := secretsmanager.NewFromConfig(cfg)
-	page := secretsmanager.NewBatchGetSecretValuePaginator(svc, &secretsmanager.BatchGetSecretValueInput{
-		SecretIdList: slices.Collect(maps.Keys(secrets)),
-	})
+	page := secretsmanager.NewBatchGetSecretValuePaginator(
+		svc,
+		&secretsmanager.BatchGetSecretValueInput{
+			SecretIdList: slices.Collect(maps.Keys(secrets)),
+		},
+	)
 	hasNext := true
 	for hasNext {
 		output, err := page.NextPage(ctx)
@@ -30,19 +33,12 @@ func batchGetSecrets(ctx context.Context, cfg aws.Config, secrets map[string]any
 			if !ok {
 				continue
 			}
-			switch sec := secret.(type) {
-			case *string:
-				*sec = *v.SecretString
-			case *[]byte:
-				s := *v.SecretString
-				*sec = []byte(s)
-			default:
-				if err := json.Unmarshal([]byte(*v.SecretString), secret); err != nil {
-					return fmt.Errorf("unmarshal secret %q: %w", *v.Name, err)
-				}
+			if err := json.Unmarshal([]byte(*v.SecretString), secret); err != nil {
+				return fmt.Errorf("unmarshal secret %q: %w", *v.Name, err)
 			}
 		}
 		hasNext = page.HasMorePages()
 	}
+
 	return nil
 }
