@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 
 	"github.com/line/line-bot-sdk-go/v7/linebot"
@@ -19,9 +18,6 @@ func (j *Job) SendPushNotificationPurchaseCompleted(ctx context.Context, message
 	channelSecret := configuration.Get().LineMessageAPI.ChannelSecret
 	channelAccessToken := configuration.Get().LineMessageAPI.ChannelAccessToken
 	luid := configuration.Get().LineMessageAPI.UserID
-
-	// todo:
-	log.Println("[info] line_message_api", "channel_secret:", channelSecret, "channel_access_token", channelAccessToken, "user_id:", luid)
 
 	bot, err := linebot.New(channelSecret, channelAccessToken)
 	if err != nil {
