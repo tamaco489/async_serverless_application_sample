@@ -10,11 +10,6 @@ resource "aws_secretsmanager_secret" "line_message_api" {
 }
 
 resource "aws_secretsmanager_secret_version" "line_message_api" {
-  secret_id = aws_secretsmanager_secret.line_message_api.id
-  # todo: sopsで生成した暗号化ファイルを紐づける
-  secret_string = jsonencode({
-    "channel_secret" : "xxxxx",
-    "channel_access_token" : "xxxxx",
-    "user_id" : "xxxxx"
-  })
+  secret_id     = aws_secretsmanager_secret.line_message_api.id
+  secret_string = jsonencode(data.sops_file.line_message_api_secret.data)
 }
