@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.8
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/line/line-bot-sdk-go/v7 v7.21.0
 )
 
 require (
