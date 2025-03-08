@@ -1,7 +1,7 @@
-package handler
+package models
 
 // SQSメッセージの構造体
-type purchaseQueueMessage struct {
+type PurchaseQueueMessage struct {
 	UserID  uint64         `json:"user_id"`
 	OrderID string         `json:"order_id"`
 	Status  PurchaseStatus `json:"status"`
