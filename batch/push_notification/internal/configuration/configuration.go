@@ -35,7 +35,7 @@ func Load(ctx context.Context) (Config, error) {
 
 	env := globalConfig.Env
 	secrets := map[string]any{
-		fmt.Sprintf("shop/%s/line-message-api", env): &globalConfig.LineMessageAPI,
+		fmt.Sprintf("async-serverless-app/%s/line-message-api", env): &globalConfig.LineMessageAPI,
 	}
 	if err := batchGetSecrets(ctx, globalConfig.AWSConfig, secrets); err != nil {
 		return globalConfig, err
