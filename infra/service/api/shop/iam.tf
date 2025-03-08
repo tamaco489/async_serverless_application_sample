@@ -50,3 +50,41 @@ resource "aws_iam_role_policy_attachment" "shop_api_sqs_role" {
   role       = aws_iam_role.shop_api.name
   policy_arn = aws_iam_policy.shop_api_sqs_policy.arn
 }
+
+# =================================================================
+# secrets manager iam policy
+# =================================================================
+data "aws_iam_policy_document" "shop_api_secrets_manager_policy" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [data.terraform_remote_state.credential_line_message_api.outputs.line_message_api.arn]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:BatchGetSecretValue",
+    ]
+    resources = ["*"]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+    ]
+    resources = [data.aws_kms_key.secretsmanager.arn]
+  }
+}
+
+resource "aws_iam_policy" "shop_api_secrets_manager_policy" {
+  name        = "${local.fqn}-api-secrets-manager-policy"
+  description = "Allows Lambda to access Secrets Manager secrets"
+  policy = data.terraform_remote_state.credential_line_message_api.outputs.line_message_api.json
+}
+
+resource "aws_iam_role_policy_attachment" "shop_api_secrets_manager_role" {
+  role = aws_iam_role.shop_api.name
+  policy_arn = aws_iam_policy.shop_api_secrets_manager_policy.arn
+}
