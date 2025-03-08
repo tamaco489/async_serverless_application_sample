@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/tamaco489/async_serverless_application_sample/batch/push_notification/internal/models"
 	"github.com/tamaco489/async_serverless_application_sample/batch/push_notification/internal/usecase"
 )
 
@@ -24,24 +25,29 @@ func PushNotificationHandler(job usecase.Job) SQSEventJob {
 		*/
 
 		for _, record := range sqsEvent.Records {
-			var message purchaseQueueMessage
+			var message models.PurchaseQueueMessage
 			if err := json.Unmarshal([]byte(record.Body), &message); err != nil {
 				slog.ErrorContext(ctx, "failed to unmarshal message", slog.String("error", err.Error()))
 				return err
 			}
 
+			// SQSから送信されたキューの構造体をUnmarshalし、Statusに応じた処理を行う。
 			switch message.Status {
-			case PurchaseStatusCompleted:
-				if err := job.SendPushNotificationPurchaseCompleted(ctx); err != nil {
+			case models.PurchaseStatusCompleted:
+				if err := job.SendPushNotificationPurchaseCompleted(ctx, message); err != nil {
 					slog.ErrorContext(ctx, "failed to process message", slog.String("error", err.Error()))
 					return err
 				}
 
-			case PurchaseStatusFailed:
-				slog.InfoContext(ctx, "message processing failed", slog.Any("message", message))
-
 			default:
-				slog.InfoContext(ctx, "skip message processing", slog.Any("message", message))
+				// 期待する条件に合致しない場合、本来は以下のようにデフォルトの処理を定義する。
+				// slog.InfoContext(ctx, "skip message processing", slog.Any("message", message))
+
+				// 今回は検証目的のため、基本全てのステータスにおいて、以下のインターフェイスを呼び出すかたちにしている。
+				if err := job.SendPushNotificationPurchaseCompleted(ctx, message); err != nil {
+					slog.ErrorContext(ctx, "failed to process message", slog.String("error", err.Error()))
+					return err
+				}
 			}
 		}
 		return nil
