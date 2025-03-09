@@ -52,8 +52,9 @@ logs:
 
 
 # =================================================================
-# dynamodb コンテナ起動したりするやつ
+# dynamodb コンテナ起動したり、テーブル作成したり、削除したりするやつ
 # =================================================================
+# コンテナの操作
 .PHONY: dynamodb-up dynamodb-down dynamodb-logs
 dynamodb-up:
 	docker compose up -d dynamodb-local dynamodb-admin
@@ -65,22 +66,24 @@ dynamodb-logs:
 	docker compose logs -f dynamodb-local
 
 
-# テーブル作成する
-.PHONY: get-tables get-user-info create-user-info delete-user-info create-transaction-histories
+# テーブル操作
+.PHONY: get-tables
 get-tables:
 	aws --endpoint-url http://localhost:8000 dynamodb list-tables | jq .
 
-get-user-info:
+get-user-info-table:
 	aws --endpoint-url http://localhost:8000 dynamodb describe-table --table-name user_info | jq .
 
-create-user-info:
-	sh -exv scripts/dynamodb/schema/user_info.sh
+get-transaction-histories-table:
+	aws --endpoint-url http://localhost:8000 dynamodb describe-table --table-name user_info | jq .
 
-create-transaction-histories:
+create-tables:
+	sh -exv scripts/dynamodb/schema/user_info.sh
 	sh -exv scripts/dynamodb/schema/transaction_histories.sh
 
-delete-user-info:
+delete-tables:
 	aws --endpoint-url http://localhost:8000 dynamodb delete-table --table-name user_info | jq .
+	aws --endpoint-url http://localhost:8000 dynamodb delete-table --table-name transaction_histories | jq .
 
 
 # =================================================================
