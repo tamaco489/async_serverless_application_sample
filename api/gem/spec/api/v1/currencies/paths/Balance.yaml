@@ -4,7 +4,7 @@ get:
     - currencies
   summary: ジェムの残高取得API
   description: 現在保有しているジェムの残高を取得する
-  operationId: getCurrencyBalance
+  operationId: getGemBalance
   responses:
     '200':
       description: 現在保有しているジェムの残高取得に成功しました。
