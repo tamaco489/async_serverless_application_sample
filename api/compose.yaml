@@ -11,3 +11,16 @@ services:
       - "8080:8080"
     env_file:
       - ./shop/.env
+
+  gem-api:
+    platform: linux/amd64
+    image: cosmtrek/air:v1.61.7
+    container_name: gem-api
+    working_dir: /go/src/github.com/tamaco489/async_serverless_application_sample/api/gem
+    volumes:
+      - ./gem:/go/src/github.com/tamaco489/async_serverless_application_sample/api/gem
+      - ~/.cache/go-build:/root/.cache/go-build
+    ports:
+      - "8081:8080"
+    env_file:
+      - ./gem/.env

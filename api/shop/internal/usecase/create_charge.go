@@ -27,9 +27,8 @@ func (u *chargeUseCase) CreateCharge(ctx *gin.Context, request gen.CreateChargeR
 		return gen.CreateCharge500Response{}, fmt.Errorf("error generating rand: %v", err)
 	}
 
-	// 注文ステータスをランダムに設定
+	// 注文ステータスをランダムに設定し、SQSにキューイングする
 	purchaseStatus := sqs_client.GetRandomPurchaseStatus()
-
 	queueMsgBody := sqs_client.PurchaseQueueMessage{
 		UserID:  uid.Uint64(),
 		OrderID: orderID,
