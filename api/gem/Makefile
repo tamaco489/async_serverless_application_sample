@@ -65,17 +65,28 @@ sleep:
 	@sleep 0.5
 
 api-all-request: healthcheck sleep \
-	get-balance sleep
+	get-gem-balance sleep \
+	update-gem-purchase sleep
 
 .PHONY: healthcheck
 healthcheck:
 	curl -i -X 'GET' \
 		'http://localhost:8081/gem/v1/healthcheck' \
 		-H 'accept: application/json'
+	@echo
 
 # 通貨系API
-.PHONY: get-balance
-get-balance:
+.PHONY: get-gem-balance update-gem-purchase
+get-gem-balance:
 	curl -i -X 'GET' \
 		'http://localhost:8081/gem/v1/currencies/balances' \
 		-H 'accept: application/json'
+	@echo
+
+update-gem-purchase:
+	curl -i -X 'PUT' \
+		'http://localhost:8081/gem/v1/currencies/purchases' \
+		-H 'accept: application/json' \
+		-H 'Content-Type: application/json' \
+		-d '{"gem_id": 10001010,"quantity": 1000}'
+	@echo

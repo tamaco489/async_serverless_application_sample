@@ -1,0 +1,14 @@
+type: object
+required:
+  - balance
+  - transaction_id
+properties:
+  balance:
+    description: 購入後のジェム残高
+    type: integer
+    format: uint32
+    example: 100000
+  transaction_id:
+    description: トランザクションID
+    type: string
+    example: "tx_purchase_001"

@@ -1,0 +1,30 @@
+put:
+  tags:
+    - v1
+    - currencies
+  summary: ジェムの購入API
+  description: ジェムを購入し、残高に加算する
+  operationId: updateGemPurchase
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/PurchaseRequest.yaml'
+  responses:
+    '201':
+      description: ジェムの購入に成功しました。
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/PurchaseResponse.yaml'
+    '400':
+      $ref: '../../../responses/BadRequest.yaml'
+    '401':
+      $ref: '../../../responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../../responses/Forbidden.yaml'
+    '404':
+      $ref: '../../../responses/NotFound.yaml'
+    '500':
+      $ref: '../../../responses/InternalServerError.yaml'

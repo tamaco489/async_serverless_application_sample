@@ -1,0 +1,15 @@
+type: object
+required:
+  - gem_id
+  - quantity
+properties:
+  gem_id:
+    description: 購入するジェムのID
+    type: integer
+    format: uint32
+    example: 10001010
+  quantity:
+    description: 購入するジェムの数量
+    type: integer
+    format: uint32
+    example: 1000

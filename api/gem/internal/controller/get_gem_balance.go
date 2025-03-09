@@ -7,9 +7,10 @@ import (
 
 func (c *Controllers) GetGemBalance(ctx *gin.Context, request gen.GetGemBalanceRequestObject) (gen.GetGemBalanceResponseObject, error) {
 
-	return gen.GetGemBalance200JSONResponse{
-		All:  1500,
-		Paid: 1000,
-		Free: 500,
-	}, nil
+	res, err := c.gemUseCase.GetGemBalance(ctx, request)
+	if err != nil {
+		return gen.GetGemBalance500Response{}, err
+	}
+
+	return res, nil
 }
