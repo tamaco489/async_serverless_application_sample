@@ -73,7 +73,7 @@ get-user-info:
 	aws --endpoint-url http://localhost:8000 dynamodb describe-table --table-name user_info | jq .
 
 create-user-info:
-	sh -exv scripts/dynamodb/schema/create_user_info.sh
+	sh -exv scripts/dynamodb/schema/user_info.sh
 
 delete-user-info:
 	aws --endpoint-url http://localhost:8000 dynamodb delete-table \
