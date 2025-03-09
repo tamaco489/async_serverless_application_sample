@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  title: async serverless application API
-  description: async serverless application API
+  title: async serverless application shop API
+  description: async serverless application shop API
   version: 1.0.0
 servers:
   - url: http://localhost:{port}/shop/
