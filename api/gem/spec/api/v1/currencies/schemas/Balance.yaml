@@ -1,0 +1,21 @@
+type: object
+required:
+  - all
+  - paid
+  - free
+properties:
+  all:
+    description: 保有している全ての通貨の残高
+    type: integer
+    format: uint32
+    example: 1500
+  paid:
+    description: 保有している有償通貨の残高
+    type: integer
+    format: uint32
+    example: 1000
+  free:
+    description: 保有している無償通貨の残高
+    type: integer
+    format: uint32
+    example: 500

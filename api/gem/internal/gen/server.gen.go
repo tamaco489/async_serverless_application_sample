@@ -14,6 +14,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// ジェムの残高取得API
+	// (GET /v1/currencies/balances)
+	GetCurrencyBalance(c *gin.Context)
 	// ヘルスチェックAPI
 	// (GET /v1/healthcheck)
 	Healthcheck(c *gin.Context)
@@ -27,6 +30,21 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(c *gin.Context)
+
+// GetCurrencyBalance operation middleware
+func (siw *ServerInterfaceWrapper) GetCurrencyBalance(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.GetCurrencyBalance(c)
+}
 
 // Healthcheck operation middleware
 func (siw *ServerInterfaceWrapper) Healthcheck(c *gin.Context) {
@@ -68,7 +86,54 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
+	router.GET(options.BaseURL+"/v1/currencies/balances", wrapper.GetCurrencyBalance)
 	router.GET(options.BaseURL+"/v1/healthcheck", wrapper.Healthcheck)
+}
+
+type InternalServerErrorResponse struct {
+}
+
+type NotFoundResponse struct {
+}
+
+type UnauthorizedResponse struct {
+}
+
+type GetCurrencyBalanceRequestObject struct {
+}
+
+type GetCurrencyBalanceResponseObject interface {
+	VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error
+}
+
+type GetCurrencyBalance200JSONResponse Balance
+
+func (response GetCurrencyBalance200JSONResponse) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetCurrencyBalance401Response = UnauthorizedResponse
+
+func (response GetCurrencyBalance401Response) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type GetCurrencyBalance404Response = NotFoundResponse
+
+func (response GetCurrencyBalance404Response) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type GetCurrencyBalance500Response = InternalServerErrorResponse
+
+func (response GetCurrencyBalance500Response) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
 }
 
 type HealthcheckRequestObject struct {
@@ -89,6 +154,9 @@ func (response Healthcheck200JSONResponse) VisitHealthcheckResponse(w http.Respo
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+	// ジェムの残高取得API
+	// (GET /v1/currencies/balances)
+	GetCurrencyBalance(ctx *gin.Context, request GetCurrencyBalanceRequestObject) (GetCurrencyBalanceResponseObject, error)
 	// ヘルスチェックAPI
 	// (GET /v1/healthcheck)
 	Healthcheck(ctx *gin.Context, request HealthcheckRequestObject) (HealthcheckResponseObject, error)
@@ -104,6 +172,31 @@ func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareF
 type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
+}
+
+// GetCurrencyBalance operation middleware
+func (sh *strictHandler) GetCurrencyBalance(ctx *gin.Context) {
+	var request GetCurrencyBalanceRequestObject
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetCurrencyBalance(ctx, request.(GetCurrencyBalanceRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetCurrencyBalance")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(GetCurrencyBalanceResponseObject); ok {
+		if err := validResponse.VisitGetCurrencyBalanceResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
 }
 
 // Healthcheck operation middleware
