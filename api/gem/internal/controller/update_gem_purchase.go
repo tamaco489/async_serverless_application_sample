@@ -7,8 +7,10 @@ import (
 
 func (c *Controllers) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPurchaseRequestObject) (gen.UpdateGemPurchaseResponseObject, error) {
 
-	return gen.UpdateGemPurchase201JSONResponse{
-		Balance:       100000,
-		TransactionId: "tx_purchase_001",
-	}, nil
+	res, err := c.gemUseCase.UpdateGemPurchase(ctx, request)
+	if err != nil {
+		return gen.UpdateGemPurchase500Response{}, err
+	}
+
+	return res, nil
 }
