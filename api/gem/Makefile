@@ -52,6 +52,19 @@ logs:
 
 
 # =================================================================
+# for DynamoDB
+# =================================================================
+.PHONY: dynamodb-up dynamodb-down dynamodb-logs
+dynamodb-up:
+	docker compose up -d dynamodb-local dynamodb-admin
+
+dynamodb-down:
+	docker compose down dynamodb-local dynamodb-admin
+
+dynamodb-logs:
+	docker compose logs -f dynamodb-local
+
+# =================================================================
 # awsリソースいろいろ操作する時用のやつ
 # =================================================================
 VERSION := gem_api_v0.0.0
