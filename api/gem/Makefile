@@ -60,8 +60,22 @@ VERSION := gem_api_v0.0.0
 # =================================================================
 # apiリクエストする時用のやつ（dev）
 # =================================================================
-.PHONY: gem-healthcheck
-gem-healthcheck:
+.PHONY: api-all-request
+sleep:
+	@sleep 0.5
+
+api-all-request: healthcheck sleep \
+	get-balance sleep
+
+.PHONY: healthcheck
+healthcheck:
 	curl -i -X 'GET' \
 		'http://localhost:8081/gem/v1/healthcheck' \
+		-H 'accept: application/json'
+
+# 通貨系API
+.PHONY: get-balance
+get-balance:
+	curl -i -X 'GET' \
+		'http://localhost:8081/gem/v1/currencies/balances' \
 		-H 'accept: application/json'

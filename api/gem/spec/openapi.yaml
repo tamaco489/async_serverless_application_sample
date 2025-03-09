@@ -29,6 +29,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthCheck'
       security: []
+  /v1/currencies/balances:
+    get:
+      tags:
+        - v1
+        - currencies
+      summary: ジェムの残高取得API
+      description: 現在保有しているジェムの残高を取得する
+      operationId: getCurrencyBalance
+      responses:
+        '200':
+          description: 現在保有しているジェムの残高取得に成功しました。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Balance'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     bearerAuth:
@@ -48,3 +69,32 @@ components:
           type: string
       example:
         message: ok
+    Balance:
+      type: object
+      required:
+        - all
+        - paid
+        - free
+      properties:
+        all:
+          description: 保有している全ての通貨の残高
+          type: integer
+          format: uint32
+          example: 1500
+        paid:
+          description: 保有している有償通貨の残高
+          type: integer
+          format: uint32
+          example: 1000
+        free:
+          description: 保有している無償通貨の残高
+          type: integer
+          format: uint32
+          example: 500
+  responses:
+    Unauthorized:
+      description: Unauthorized
+    NotFound:
+      description: Not Found
+    InternalServerError:
+      description: Internal Server Error
