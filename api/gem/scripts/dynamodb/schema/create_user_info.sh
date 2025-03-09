@@ -13,10 +13,19 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
     --global-secondary-indexes '[
       {
-        "IndexName": "LastLoginIndex",
+        "IndexName": "PaidGemBalanceIndex",
         "KeySchema": [
           {"AttributeName": "user_id", "KeyType": "HASH"},
-          {"AttributeName": "last_login", "KeyType": "RANGE"}
+          {"AttributeName": "paid_gem_balance", "KeyType": "RANGE"}
+        ],
+        "Projection": {"ProjectionType": "ALL"},
+        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+      },
+      {
+        "IndexName": "FreeGemBalanceIndex",
+        "KeySchema": [
+          {"AttributeName": "user_id", "KeyType": "HASH"},
+          {"AttributeName": "free_gem_balance", "KeyType": "RANGE"}
         ],
         "Projection": {"ProjectionType": "ALL"},
         "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
@@ -40,19 +49,10 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
         "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
       },
       {
-        "IndexName": "PaidGemBalanceIndex",
+        "IndexName": "LastLoginIndex",
         "KeySchema": [
           {"AttributeName": "user_id", "KeyType": "HASH"},
-          {"AttributeName": "paid_gem_balance", "KeyType": "RANGE"}
-        ],
-        "Projection": {"ProjectionType": "ALL"},
-        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
-      },
-      {
-        "IndexName": "FreeGemBalanceIndex",
-        "KeySchema": [
-          {"AttributeName": "user_id", "KeyType": "HASH"},
-          {"AttributeName": "free_gem_balance", "KeyType": "RANGE"}
+          {"AttributeName": "last_login", "KeyType": "RANGE"}
         ],
         "Projection": {"ProjectionType": "ALL"},
         "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
