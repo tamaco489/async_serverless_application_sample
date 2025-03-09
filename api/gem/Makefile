@@ -65,6 +65,21 @@ dynamodb-logs:
 	docker compose logs -f dynamodb-local
 
 
+.PHONY: get-tables get-user-info create-user-info delete-user-info
+get-tables:
+	aws --endpoint-url http://localhost:8000 dynamodb list-tables | tee
+
+get-user-info:
+	aws --endpoint-url http://localhost:8000 dynamodb describe-table --table-name user_info | jq .
+
+create-user-info:
+	sh -exv scripts/dynamodb/schema/create_user_info.sh
+
+delete-user-info:
+	aws --endpoint-url http://localhost:8000 dynamodb delete-table \
+		--table-name user_info | jq .
+
+
 # =================================================================
 # awsリソースいろいろ操作する時用のやつ
 # =================================================================
