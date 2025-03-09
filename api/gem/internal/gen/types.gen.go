@@ -24,3 +24,24 @@ type HealthCheck struct {
 	// Message メッセージ。通常はok
 	Message string `json:"message"`
 }
+
+// PurchaseRequest defines model for PurchaseRequest.
+type PurchaseRequest struct {
+	// GemId 購入するジェムのID
+	GemId uint32 `json:"gem_id"`
+
+	// Quantity 購入するジェムの数量
+	Quantity uint32 `json:"quantity"`
+}
+
+// PurchaseResponse defines model for PurchaseResponse.
+type PurchaseResponse struct {
+	// Balance 購入後のジェム残高
+	Balance uint32 `json:"balance"`
+
+	// TransactionId トランザクションID
+	TransactionId string `json:"transaction_id"`
+}
+
+// UpdateGemPurchaseJSONRequestBody defines body for UpdateGemPurchase for application/json ContentType.
+type UpdateGemPurchaseJSONRequestBody = PurchaseRequest
