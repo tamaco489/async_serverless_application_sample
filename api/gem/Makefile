@@ -52,7 +52,7 @@ logs:
 
 
 # =================================================================
-# for DynamoDB
+# dynamodb コンテナ起動したりするやつ
 # =================================================================
 .PHONY: dynamodb-up dynamodb-down dynamodb-logs
 dynamodb-up:
@@ -63,6 +63,7 @@ dynamodb-down:
 
 dynamodb-logs:
 	docker compose logs -f dynamodb-local
+
 
 # =================================================================
 # awsリソースいろいろ操作する時用のやつ
