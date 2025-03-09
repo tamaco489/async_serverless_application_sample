@@ -36,7 +36,7 @@ paths:
         - currencies
       summary: ジェムの残高取得API
       description: 現在保有しているジェムの残高を取得する
-      operationId: getCurrencyBalance
+      operationId: getGemBalance
       responses:
         '200':
           description: 現在保有しているジェムの残高取得に成功しました。
@@ -46,6 +46,37 @@ paths:
                 $ref: '#/components/schemas/Balance'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /v1/currencies/purchases:
+    put:
+      tags:
+        - v1
+        - currencies
+      summary: ジェムの購入API
+      description: ジェムを購入し、残高に加算する
+      operationId: updateGemPurchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseRequest'
+      responses:
+        '201':
+          description: ジェムの購入に成功しました。
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -91,6 +122,37 @@ components:
           type: integer
           format: uint32
           example: 500
+    PurchaseRequest:
+      type: object
+      required:
+        - gem_id
+        - quantity
+      properties:
+        gem_id:
+          description: 購入するジェムのID
+          type: integer
+          format: uint32
+          example: 10001010
+        quantity:
+          description: 購入するジェムの数量
+          type: integer
+          format: uint32
+          example: 1000
+    PurchaseResponse:
+      type: object
+      required:
+        - balance
+        - transaction_id
+      properties:
+        balance:
+          description: 購入後のジェム残高
+          type: integer
+          format: uint32
+          example: 100000
+        transaction_id:
+          description: トランザクションID
+          type: string
+          example: tx_purchase_001
   responses:
     Unauthorized:
       description: Unauthorized
@@ -98,3 +160,7 @@ components:
       description: Not Found
     InternalServerError:
       description: Internal Server Error
+    BadRequest:
+      description: Bad Request
+    Forbidden:
+      description: Forbidden

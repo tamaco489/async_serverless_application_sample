@@ -44,3 +44,5 @@ paths:
   # 通貨系API
   /v1/currencies/balances:
     $ref: './api/v1/currencies/paths/Balance.yaml'
+  /v1/currencies/purchases:
+    $ref: './api/v1/currencies/paths/Purchase.yaml'

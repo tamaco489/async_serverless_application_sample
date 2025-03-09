@@ -16,7 +16,10 @@ import (
 type ServerInterface interface {
 	// ジェムの残高取得API
 	// (GET /v1/currencies/balances)
-	GetCurrencyBalance(c *gin.Context)
+	GetGemBalance(c *gin.Context)
+	// ジェムの購入API
+	// (PUT /v1/currencies/purchases)
+	UpdateGemPurchase(c *gin.Context)
 	// ヘルスチェックAPI
 	// (GET /v1/healthcheck)
 	Healthcheck(c *gin.Context)
@@ -31,8 +34,8 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(c *gin.Context)
 
-// GetCurrencyBalance operation middleware
-func (siw *ServerInterfaceWrapper) GetCurrencyBalance(c *gin.Context) {
+// GetGemBalance operation middleware
+func (siw *ServerInterfaceWrapper) GetGemBalance(c *gin.Context) {
 
 	c.Set(BearerAuthScopes, []string{})
 
@@ -43,7 +46,22 @@ func (siw *ServerInterfaceWrapper) GetCurrencyBalance(c *gin.Context) {
 		}
 	}
 
-	siw.Handler.GetCurrencyBalance(c)
+	siw.Handler.GetGemBalance(c)
+}
+
+// UpdateGemPurchase operation middleware
+func (siw *ServerInterfaceWrapper) UpdateGemPurchase(c *gin.Context) {
+
+	c.Set(BearerAuthScopes, []string{})
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.UpdateGemPurchase(c)
 }
 
 // Healthcheck operation middleware
@@ -86,8 +104,15 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/v1/currencies/balances", wrapper.GetCurrencyBalance)
+	router.GET(options.BaseURL+"/v1/currencies/balances", wrapper.GetGemBalance)
+	router.PUT(options.BaseURL+"/v1/currencies/purchases", wrapper.UpdateGemPurchase)
 	router.GET(options.BaseURL+"/v1/healthcheck", wrapper.Healthcheck)
+}
+
+type BadRequestResponse struct {
+}
+
+type ForbiddenResponse struct {
 }
 
 type InternalServerErrorResponse struct {
@@ -99,39 +124,91 @@ type NotFoundResponse struct {
 type UnauthorizedResponse struct {
 }
 
-type GetCurrencyBalanceRequestObject struct {
+type GetGemBalanceRequestObject struct {
 }
 
-type GetCurrencyBalanceResponseObject interface {
-	VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error
+type GetGemBalanceResponseObject interface {
+	VisitGetGemBalanceResponse(w http.ResponseWriter) error
 }
 
-type GetCurrencyBalance200JSONResponse Balance
+type GetGemBalance200JSONResponse Balance
 
-func (response GetCurrencyBalance200JSONResponse) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+func (response GetGemBalance200JSONResponse) VisitGetGemBalanceResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetCurrencyBalance401Response = UnauthorizedResponse
+type GetGemBalance401Response = UnauthorizedResponse
 
-func (response GetCurrencyBalance401Response) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+func (response GetGemBalance401Response) VisitGetGemBalanceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(401)
 	return nil
 }
 
-type GetCurrencyBalance404Response = NotFoundResponse
+type GetGemBalance404Response = NotFoundResponse
 
-func (response GetCurrencyBalance404Response) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+func (response GetGemBalance404Response) VisitGetGemBalanceResponse(w http.ResponseWriter) error {
 	w.WriteHeader(404)
 	return nil
 }
 
-type GetCurrencyBalance500Response = InternalServerErrorResponse
+type GetGemBalance500Response = InternalServerErrorResponse
 
-func (response GetCurrencyBalance500Response) VisitGetCurrencyBalanceResponse(w http.ResponseWriter) error {
+func (response GetGemBalance500Response) VisitGetGemBalanceResponse(w http.ResponseWriter) error {
+	w.WriteHeader(500)
+	return nil
+}
+
+type UpdateGemPurchaseRequestObject struct {
+	Body *UpdateGemPurchaseJSONRequestBody
+}
+
+type UpdateGemPurchaseResponseObject interface {
+	VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error
+}
+
+type UpdateGemPurchase201JSONResponse PurchaseResponse
+
+func (response UpdateGemPurchase201JSONResponse) VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(201)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UpdateGemPurchase400Response = BadRequestResponse
+
+func (response UpdateGemPurchase400Response) VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(400)
+	return nil
+}
+
+type UpdateGemPurchase401Response = UnauthorizedResponse
+
+func (response UpdateGemPurchase401Response) VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(401)
+	return nil
+}
+
+type UpdateGemPurchase403Response = ForbiddenResponse
+
+func (response UpdateGemPurchase403Response) VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(403)
+	return nil
+}
+
+type UpdateGemPurchase404Response = NotFoundResponse
+
+func (response UpdateGemPurchase404Response) VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error {
+	w.WriteHeader(404)
+	return nil
+}
+
+type UpdateGemPurchase500Response = InternalServerErrorResponse
+
+func (response UpdateGemPurchase500Response) VisitUpdateGemPurchaseResponse(w http.ResponseWriter) error {
 	w.WriteHeader(500)
 	return nil
 }
@@ -156,7 +233,10 @@ func (response Healthcheck200JSONResponse) VisitHealthcheckResponse(w http.Respo
 type StrictServerInterface interface {
 	// ジェムの残高取得API
 	// (GET /v1/currencies/balances)
-	GetCurrencyBalance(ctx *gin.Context, request GetCurrencyBalanceRequestObject) (GetCurrencyBalanceResponseObject, error)
+	GetGemBalance(ctx *gin.Context, request GetGemBalanceRequestObject) (GetGemBalanceResponseObject, error)
+	// ジェムの購入API
+	// (PUT /v1/currencies/purchases)
+	UpdateGemPurchase(ctx *gin.Context, request UpdateGemPurchaseRequestObject) (UpdateGemPurchaseResponseObject, error)
 	// ヘルスチェックAPI
 	// (GET /v1/healthcheck)
 	Healthcheck(ctx *gin.Context, request HealthcheckRequestObject) (HealthcheckResponseObject, error)
@@ -174,15 +254,15 @@ type strictHandler struct {
 	middlewares []StrictMiddlewareFunc
 }
 
-// GetCurrencyBalance operation middleware
-func (sh *strictHandler) GetCurrencyBalance(ctx *gin.Context) {
-	var request GetCurrencyBalanceRequestObject
+// GetGemBalance operation middleware
+func (sh *strictHandler) GetGemBalance(ctx *gin.Context) {
+	var request GetGemBalanceRequestObject
 
 	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
-		return sh.ssi.GetCurrencyBalance(ctx, request.(GetCurrencyBalanceRequestObject))
+		return sh.ssi.GetGemBalance(ctx, request.(GetGemBalanceRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetCurrencyBalance")
+		handler = middleware(handler, "GetGemBalance")
 	}
 
 	response, err := handler(ctx, request)
@@ -190,8 +270,41 @@ func (sh *strictHandler) GetCurrencyBalance(ctx *gin.Context) {
 	if err != nil {
 		ctx.Error(err)
 		ctx.Status(http.StatusInternalServerError)
-	} else if validResponse, ok := response.(GetCurrencyBalanceResponseObject); ok {
-		if err := validResponse.VisitGetCurrencyBalanceResponse(ctx.Writer); err != nil {
+	} else if validResponse, ok := response.(GetGemBalanceResponseObject); ok {
+		if err := validResponse.VisitGetGemBalanceResponse(ctx.Writer); err != nil {
+			ctx.Error(err)
+		}
+	} else if response != nil {
+		ctx.Error(fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UpdateGemPurchase operation middleware
+func (sh *strictHandler) UpdateGemPurchase(ctx *gin.Context) {
+	var request UpdateGemPurchaseRequestObject
+
+	var body UpdateGemPurchaseJSONRequestBody
+	if err := ctx.ShouldBind(&body); err != nil {
+		ctx.Status(http.StatusBadRequest)
+		ctx.Error(err)
+		return
+	}
+	request.Body = &body
+
+	handler := func(ctx *gin.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.UpdateGemPurchase(ctx, request.(UpdateGemPurchaseRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UpdateGemPurchase")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		ctx.Error(err)
+		ctx.Status(http.StatusInternalServerError)
+	} else if validResponse, ok := response.(UpdateGemPurchaseResponseObject); ok {
+		if err := validResponse.VisitUpdateGemPurchaseResponse(ctx.Writer); err != nil {
 			ctx.Error(err)
 		}
 	} else if response != nil {
