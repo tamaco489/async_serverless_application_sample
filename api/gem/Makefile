@@ -65,9 +65,10 @@ dynamodb-logs:
 	docker compose logs -f dynamodb-local
 
 
-.PHONY: get-tables get-user-info create-user-info delete-user-info
+# テーブル作成する
+.PHONY: get-tables get-user-info create-user-info delete-user-info create-transaction-histories
 get-tables:
-	aws --endpoint-url http://localhost:8000 dynamodb list-tables | tee
+	aws --endpoint-url http://localhost:8000 dynamodb list-tables | jq .
 
 get-user-info:
 	aws --endpoint-url http://localhost:8000 dynamodb describe-table --table-name user_info | jq .
@@ -75,9 +76,11 @@ get-user-info:
 create-user-info:
 	sh -exv scripts/dynamodb/schema/user_info.sh
 
+create-transaction-histories:
+	sh -exv scripts/dynamodb/schema/transaction_histories.sh
+
 delete-user-info:
-	aws --endpoint-url http://localhost:8000 dynamodb delete-table \
-		--table-name user_info | jq .
+	aws --endpoint-url http://localhost:8000 dynamodb delete-table --table-name user_info | jq .
 
 
 # =================================================================
