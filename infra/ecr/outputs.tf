@@ -7,6 +7,15 @@ output "shop_api" {
   }
 }
 
+output "gem_api" {
+  value = {
+    arn  = aws_ecr_repository.gem_api.arn
+    id   = aws_ecr_repository.gem_api.id
+    name = aws_ecr_repository.gem_api.name
+    url  = aws_ecr_repository.gem_api.repository_url
+  }
+}
+
 output "push_notification_batch" {
   value = {
     arn  = aws_ecr_repository.push_notification_batch.arn

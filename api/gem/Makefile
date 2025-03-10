@@ -69,6 +69,24 @@ dynamodb-logs:
 # =================================================================
 VERSION := gem_api_v0.0.0
 
+# ecr
+.PHONY: auth push get-images delete-images
+auth:
+	aws ecr get-login-password --region ap-northeast-1 --profile ${AWS_PROFILE} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com
+
+push: auth
+	docker build --platform linux/amd64 --no-cache -t $(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/stg-gem-api:$(VERSION) -f ./build/Dockerfile.gem .
+	docker push ${AWS_ACCOUNT_ID}.dkr.ecr.ap-northeast-1.amazonaws.com/stg-gem-api:$(VERSION)
+
+get-images:
+	aws ecr list-images --repository-name stg-gem-api --region ap-northeast-1 --profile ${AWS_PROFILE} --query 'imageIds[*]' | jq .
+
+delete-images:
+	@aws ecr list-images --repository-name stg-gem-api --region ap-northeast-1 --profile ${AWS_PROFILE} --query 'imageIds[*]' --output json > /tmp/images.json
+	@cat /tmp/images.json | jq -c '.[]' | while read -r image_id; do \
+		aws ecr batch-delete-image --repository-name stg-gem-api --region ap-northeast-1 --profile ${AWS_PROFILE} --image-ids $${image_id}; \
+	done | jq .
+
 
 # =================================================================
 # apiリクエストする時用のやつ（dev）

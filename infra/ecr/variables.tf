@@ -10,18 +10,9 @@ variable "project" {
   default     = "async-serverless-app"
 }
 
-variable "product" {
-  description = "The product name"
-  type        = string
-  default     = "shop"
-}
-
-variable "feature" {
-  description = "The service name"
-  type        = string
-  default     = "push-notification"
-}
-
 locals {
-  fqn = "${var.env}-${var.project}"
+  fqn                     = "${var.env}-${var.project}"
+  shop_api                = "${var.env}-shop-api"
+  gem_api                 = "${var.env}-gem-api"
+  push_notification_batch = "${var.env}-push-notification-batch"
 }
