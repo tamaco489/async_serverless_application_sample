@@ -19,9 +19,9 @@ resource "aws_lambda_function" "gem_api" {
 
   environment {
     variables = {
-      API_SERVICE_NAME          = "gem-api"
-      API_ENV                   = "stg"
-      API_PORT                  = "8080"
+      API_SERVICE_NAME = "gem-api"
+      API_ENV          = "stg"
+      API_PORT         = "8080"
     }
   }
 
