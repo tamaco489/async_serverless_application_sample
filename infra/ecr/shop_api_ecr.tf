@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "shop_api" {
-  name                 = "${var.env}-${var.product}-api"
+  name                 = local.shop_api
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -9,7 +9,7 @@ resource "aws_ecr_repository" "shop_api" {
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${var.env}-${var.product}-api"
+    Name    = "${local.shop_api}"
   }
 }
 

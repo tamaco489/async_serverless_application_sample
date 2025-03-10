@@ -1,5 +1,5 @@
-resource "aws_ecr_repository" "push_notification_batch" {
-  name                 = local.push_notification_batch
+resource "aws_ecr_repository" "gem_api" {
+  name                 = local.gem_api
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -9,12 +9,12 @@ resource "aws_ecr_repository" "push_notification_batch" {
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${local.push_notification_batch}"
+    Name    = "${local.gem_api}"
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "push_notification_batch" {
-  repository = aws_ecr_repository.push_notification_batch.name
+resource "aws_ecr_lifecycle_policy" "gem_api" {
+  repository = aws_ecr_repository.gem_api.name
   policy = jsonencode(
     {
       "rules" : [
@@ -23,7 +23,7 @@ resource "aws_ecr_lifecycle_policy" "push_notification_batch" {
           "description" : "バージョン付きのイメージを5個保持する、6個目がアップロードされた際には古いものから順に削除されていく",
           "selection" : {
             "tagStatus" : "tagged",
-            "tagPrefixList" : ["push_notification_batch_v"],
+            "tagPrefixList" : ["gem_api_v"],
             "countType" : "imageCountMoreThan",
             "countNumber" : 5
           },
