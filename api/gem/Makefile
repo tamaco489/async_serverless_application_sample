@@ -87,6 +87,13 @@ delete-images:
 		aws ecr batch-delete-image --repository-name stg-gem-api --region ap-northeast-1 --profile ${AWS_PROFILE} --image-ids $${image_id}; \
 	done | jq .
 
+# lambda
+.PHONY: deploy
+deploy: push
+	aws lambda update-function-code  --profile ${AWS_PROFILE} \
+		--function-name stg-gem-api \
+		--image-uri $(AWS_ACCOUNT_ID).dkr.ecr.ap-northeast-1.amazonaws.com/stg-gem-api:$(VERSION) | jq .
+
 
 # =================================================================
 # apiリクエストする時用のやつ（dev）
@@ -102,7 +109,7 @@ api-all-request: healthcheck sleep \
 .PHONY: healthcheck
 healthcheck:
 	curl -i -X 'GET' \
-		'http://localhost:8081/gem/v1/healthcheck' \
+		'http://localhost:8081/gem/v2/healthcheck' \
 		-H 'accept: application/json'
 	@echo
 
@@ -110,13 +117,43 @@ healthcheck:
 .PHONY: get-gem-balance update-gem-purchase
 get-gem-balance:
 	curl -i -X 'GET' \
-		'http://localhost:8081/gem/v1/currencies/balances' \
+		'http://localhost:8081/gem/v2/currencies/balances' \
 		-H 'accept: application/json'
 	@echo
 
 update-gem-purchase:
 	curl -i -X 'PUT' \
-		'http://localhost:8081/gem/v1/currencies/purchases' \
+		'http://localhost:8081/gem/v2/currencies/purchases' \
+		-H 'accept: application/json' \
+		-H 'Content-Type: application/json' \
+		-d '{"gem_id": 10001010,"quantity": 1000}'
+	@echo
+
+# =================================================================
+# apiリクエストする時用のやつ（stg）
+# =================================================================
+AWS_API_v2_DOMAIN := <api.domain>
+
+stg-api-all-request: stg-healthcheck sleep \
+	stg-get-gem-balance sleep \
+	stg-update-gem-purchase sleep
+
+.PHONY: stg-healthcheck
+stg-healthcheck:
+	curl -i -X 'GET' \
+		'https://${AWS_API_v2_DOMAIN}/gem/v2/healthcheck' \
+		-H 'accept: application/json'
+
+.PHONY: stg-get-gem-balance stg-update-gem-purchase
+stg-get-gem-balance:
+	curl -i -X 'GET' \
+		'https://${AWS_API_v2_DOMAIN}/gem/v2/currencies/balances' \
+		-H 'accept: application/json'
+	@echo
+
+stg-update-gem-purchase:
+	curl -i -X 'PUT' \
+		'https://${AWS_API_v2_DOMAIN}/gem/v2/currencies/purchases' \
 		-H 'accept: application/json' \
 		-H 'Content-Type: application/json' \
 		-d '{"gem_id": 10001010,"quantity": 1000}'
