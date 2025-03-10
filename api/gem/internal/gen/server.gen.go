@@ -15,13 +15,13 @@ import (
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// ジェムの残高取得API
-	// (GET /v1/currencies/balances)
+	// (GET /v2/currencies/balances)
 	GetGemBalance(c *gin.Context)
 	// ジェムの購入API
-	// (PUT /v1/currencies/purchases)
+	// (PUT /v2/currencies/purchases)
 	UpdateGemPurchase(c *gin.Context)
 	// ヘルスチェックAPI
-	// (GET /v1/healthcheck)
+	// (GET /v2/healthcheck)
 	Healthcheck(c *gin.Context)
 }
 
@@ -104,9 +104,9 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 		ErrorHandler:       errorHandler,
 	}
 
-	router.GET(options.BaseURL+"/v1/currencies/balances", wrapper.GetGemBalance)
-	router.PUT(options.BaseURL+"/v1/currencies/purchases", wrapper.UpdateGemPurchase)
-	router.GET(options.BaseURL+"/v1/healthcheck", wrapper.Healthcheck)
+	router.GET(options.BaseURL+"/v2/currencies/balances", wrapper.GetGemBalance)
+	router.PUT(options.BaseURL+"/v2/currencies/purchases", wrapper.UpdateGemPurchase)
+	router.GET(options.BaseURL+"/v2/healthcheck", wrapper.Healthcheck)
 }
 
 type BadRequestResponse struct {
@@ -232,13 +232,13 @@ func (response Healthcheck200JSONResponse) VisitHealthcheckResponse(w http.Respo
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// ジェムの残高取得API
-	// (GET /v1/currencies/balances)
+	// (GET /v2/currencies/balances)
 	GetGemBalance(ctx *gin.Context, request GetGemBalanceRequestObject) (GetGemBalanceResponseObject, error)
 	// ジェムの購入API
-	// (PUT /v1/currencies/purchases)
+	// (PUT /v2/currencies/purchases)
 	UpdateGemPurchase(ctx *gin.Context, request UpdateGemPurchaseRequestObject) (UpdateGemPurchaseResponseObject, error)
 	// ヘルスチェックAPI
-	// (GET /v1/healthcheck)
+	// (GET /v2/healthcheck)
 	Healthcheck(ctx *gin.Context, request HealthcheckRequestObject) (HealthcheckResponseObject, error)
 }
 
