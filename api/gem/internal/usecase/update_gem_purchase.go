@@ -52,8 +52,13 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	}
 
 	now := time.Now().Format(time.RFC3339)
-	balance := gem.PackQuantity * request.Body.Quantity
 	freeGemBalance, level := "0", "1"
+
+	// ジェムの購入数（パック単位の個数 × リクエスト数）
+	paidQuantity := gem.PackQuantity * request.Body.Quantity
+
+	// 初回のリクエスト時のジェムの残高としても利用、既にデータが存在する場合は後続の処理で、現在の残高に今回の購入数を足し合わせた値で更新
+	balance := paidQuantity
 
 	// 作成日時の初期値は現在時刻とし、データが存在していた場合はその値を設定して更新
 	createdAt := attributeValueToString(&types.AttributeValueMemberS{Value: now})
@@ -63,6 +68,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 		item := getResult.Item
 		existingBalance, ok := item["paid_gem_balance"].(*types.AttributeValueMemberN)
 		if ok {
+			// 今回の購入数に残高を足し合わせる
 			balanceInt, _ := strconv.ParseUint(existingBalance.Value, 10, 64)
 			balance += uint32(balanceInt)
 		}
@@ -100,7 +106,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 		"gem_id":            &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(request.Body.GemId), 10)},
 		"paid_gem_quantity": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(gem.PackQuantity*request.Body.Quantity), 10)},
 		"free_gem_quantity": &types.AttributeValueMemberN{Value: freeGemBalance},
-		"description":       &types.AttributeValueMemberS{Value: fmt.Sprintf("有償ジェムを%d個購入しました。(%d個セット×%d)", gem.PackQuantity*request.Body.Quantity, gem.PackQuantity, request.Body.Quantity)},
+		"description":       &types.AttributeValueMemberS{Value: GenerateGemPurchaseDescription(gem.PackQuantity, request.Body.Quantity)},
 	}
 
 	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
@@ -131,4 +137,9 @@ func attributeValueToString(av types.AttributeValue) string {
 	default:
 		return ""
 	}
+}
+
+// GenerateGemPurchaseDescription: ジェム購入の説明文を生成する
+func GenerateGemPurchaseDescription(packQuantity, quantity uint32) string {
+	return fmt.Sprintf("有償ジェムを%d個購入しました。(%d個セット×%d)", packQuantity*quantity, packQuantity, quantity)
 }
