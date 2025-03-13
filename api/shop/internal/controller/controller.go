@@ -18,7 +18,7 @@ func NewControllers(cnf configuration.Config) (*Controllers, error) {
 
 	sqsClient, err := sqs_client.NewSQSClient(cnf.AWSConfig, cnf.API.Env)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create sqs client: %v", err)
+		return nil, fmt.Errorf("failed to init sqs client: %w", err)
 	}
 
 	chargeUseCase := usecase.NewChargeUseCase(sqsClient)
