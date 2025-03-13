@@ -26,7 +26,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	getResult, err := dc.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String("player_profiles"),
 		Key: map[string]types.AttributeValue{
-			"player_id": &types.AttributeValueMemberS{Value: playerID},
+			"player_id": &types.AttributeValueMemberN{Value: playerID},
 		},
 	})
 	if err != nil {
@@ -59,7 +59,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	}
 
 	profile := map[string]types.AttributeValue{
-		"player_id":        &types.AttributeValueMemberS{Value: playerID},
+		"player_id":        &types.AttributeValueMemberN{Value: playerID},
 		"paid_gem_balance": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(balance), 10)},
 		"free_gem_balance": &types.AttributeValueMemberN{Value: freeGemBalance},
 		"level":            &types.AttributeValueMemberN{Value: level},
@@ -81,7 +81,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	transaction := map[string]types.AttributeValue{
 		"transaction_id":    &types.AttributeValueMemberS{Value: transactionID},
 		"timestamp":         &types.AttributeValueMemberS{Value: now},
-		"player_id":         &types.AttributeValueMemberS{Value: playerID},
+		"player_id":         &types.AttributeValueMemberN{Value: playerID},
 		"transaction_type":  &types.AttributeValueMemberS{Value: "paid"}, // or free
 		"gem_id":            &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(request.Body.GemId), 10)},
 		"paid_gem_quantity": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(quantityByGemID), 10)},
