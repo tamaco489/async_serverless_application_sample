@@ -3,7 +3,7 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --attribute-definitions \
         AttributeName=transaction_id,AttributeType=S \
         AttributeName=timestamp,AttributeType=S \
-        AttributeName=player_id,AttributeType=S \
+        AttributeName=player_id,AttributeType=N \
         AttributeName=transaction_type,AttributeType=S \
         AttributeName=gem_id,AttributeType=N \
         AttributeName=paid_gem_quantity,AttributeType=N \

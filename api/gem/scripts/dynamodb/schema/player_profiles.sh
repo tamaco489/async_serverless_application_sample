@@ -3,7 +3,7 @@
 aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --table-name player_profiles \
     --attribute-definitions \
-        AttributeName=player_id,AttributeType=S \
+        AttributeName=player_id,AttributeType=N \
         AttributeName=paid_gem_balance,AttributeType=N \
         AttributeName=free_gem_balance,AttributeType=N \
         AttributeName=level,AttributeType=N \
