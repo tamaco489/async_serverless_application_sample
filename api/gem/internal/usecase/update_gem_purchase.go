@@ -42,7 +42,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	// player_idをキーにしてデータを取得、存在する場合は更新、存在しない場合は新規作成の処理を行う。
 	dc := u.dynamoDBClient.Client()
 	getResult, err := dc.GetItem(ctx, &dynamodb.GetItemInput{
-		TableName: aws.String("player_profiles"),
+		TableName: aws.String(entity.PlayerProfilesTable.String()),
 		Key: map[string]types.AttributeValue{
 			"player_id": &types.AttributeValueMemberN{Value: playerID},
 		},
@@ -88,7 +88,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	}
 
 	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName: aws.String("player_profiles"),
+		TableName: aws.String(entity.PlayerProfilesTable.String()),
 		Item:      profile,
 	})
 	if err != nil {
@@ -110,7 +110,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	}
 
 	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
-		TableName: aws.String("transaction_histories"),
+		TableName: aws.String(entity.TransactionHistoriesTable.String()),
 		Item:      transaction,
 	})
 	if err != nil {
