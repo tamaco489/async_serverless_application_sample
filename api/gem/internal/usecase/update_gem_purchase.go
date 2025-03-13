@@ -22,7 +22,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 
 	// ***** 1. リクエスト内容の検証 *****
 	// 指定したジェムIDが存在するかどうか
-	gem, err := entity.GetGemMasterByID(request.Body.GemId)
+	gem, err := entity.GetGemPackByID(request.Body.GemId)
 	if err != nil {
 		slog.ErrorContext(ctx, "the specified gem_id does not exist", slog.Uint64("gem_id", uint64(request.Body.GemId)))
 		return gen.UpdateGemPurchase400Response{}, nil
@@ -35,20 +35,12 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 		return gen.UpdateGemPurchase400Response{}, nil
 	}
 
-	// 個数の指定が正しいかどうか（1~500までの範囲）
-	gemQuantity, err := value_object.ValidateQuantity(request.Body.Quantity)
-	if err != nil {
-		slog.ErrorContext(ctx, "the purchase quantity must be within the allowed range", slog.String("error", err.Error()))
-		return gen.UpdateGemPurchase400Response{}, nil
-	}
-
-	dc := u.dynamoDBClient.Client()
-
 	// ***** 2. player_profiles のデータ参照/更新 *****
 	// 本来はcontextなどからuidを取得する
 	playerID := "27110642"
 
 	// player_idをキーにしてデータを取得、存在する場合は更新、存在しない場合は新規作成の処理を行う。
+	dc := u.dynamoDBClient.Client()
 	getResult, err := dc.GetItem(ctx, &dynamodb.GetItemInput{
 		TableName: aws.String("player_profiles"),
 		Key: map[string]types.AttributeValue{
@@ -60,7 +52,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	}
 
 	now := time.Now().Format(time.RFC3339)
-	balance := request.Body.Quantity * gemQuantity.Uint32()
+	balance := gem.PackQuantity * request.Body.Quantity
 	freeGemBalance, level := "0", "1"
 
 	// 作成日時の初期値は現在時刻とし、データが存在していた場合はその値を設定して更新
@@ -106,9 +98,9 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 		"player_id":         &types.AttributeValueMemberN{Value: playerID},
 		"transaction_type":  &types.AttributeValueMemberS{Value: value_object.PaidGem.String()},
 		"gem_id":            &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(request.Body.GemId), 10)},
-		"paid_gem_quantity": &types.AttributeValueMemberN{Value: strconv.FormatUint(gemQuantity.Uint64(), 10)},
+		"paid_gem_quantity": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(gem.PackQuantity*request.Body.Quantity), 10)},
 		"free_gem_quantity": &types.AttributeValueMemberN{Value: freeGemBalance},
-		"description":       &types.AttributeValueMemberS{Value: fmt.Sprintf("有償ジェムを%d個購入しました。(%d個セット×%d)", request.Body.Quantity*gemQuantity.Uint32(), gem.Quantity, request.Body.Quantity)},
+		"description":       &types.AttributeValueMemberS{Value: fmt.Sprintf("有償ジェムを%d個購入しました。(%d個セット×%d)", gem.PackQuantity*request.Body.Quantity, gem.PackQuantity, request.Body.Quantity)},
 	}
 
 	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
