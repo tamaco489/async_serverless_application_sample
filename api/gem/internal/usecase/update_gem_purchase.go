@@ -38,7 +38,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 
 	time.Sleep(750 * time.Millisecond)
 
-	// 指定したジェムIDが存在するかどうか、購入可能かどうかの検証
+	// ***** 1. 指定したジェムIDが存在するかどうか、購入可能かどうかの検証 *****
 	gem, exists := gemMaster[request.Body.GemId]
 	if !exists {
 		slog.ErrorContext(ctx, "the specified gem_id does not exist", slog.Uint64("gem_id", uint64(request.Body.GemId)))
@@ -57,7 +57,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 
 	dc := u.dynamoDBClient.Client()
 
-	// ***** 1. player_profiles のデータ参照/更新 *****
+	// ***** 2. player_profiles のデータ参照/更新 *****
 	// 本来はcontextなどからuidを取得する
 	playerID := "27110642"
 
@@ -110,7 +110,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 		return gen.UpdateGemPurchase500Response{}, fmt.Errorf("failed to put item from player_profiles table: %w", err)
 	}
 
-	// ***** 2. transaction_histories のデータ追加 *****
+	// ***** 3. transaction_histories のデータ追加 *****
 	transactionID := uuid.New().String()
 
 	transaction := map[string]types.AttributeValue{
