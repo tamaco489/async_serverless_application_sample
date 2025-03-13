@@ -36,8 +36,8 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	now := time.Now().Format(time.RFC3339)
 
 	// 本来はマスタを参照し、gem_idに対応するアイテムの個数を取得するが、現時点ではget_id=10001010は30個のジェムとしてMock的に扱う
-	var quantityByID uint32 = 30
-	balance := request.Body.Quantity * quantityByID
+	var quantityByGemID uint32 = 30
+	balance := request.Body.Quantity * quantityByGemID
 
 	// 作成日時の初期値は現在時刻とし、データが存在していた場合はその値を設定して更新
 	createdAt := attributeValueToString(&types.AttributeValueMemberS{Value: now})
@@ -58,7 +58,7 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 		createdAt = attributeValueToString(item["created_at"])
 	}
 
-	item := map[string]types.AttributeValue{
+	profile := map[string]types.AttributeValue{
 		"player_id":        &types.AttributeValueMemberS{Value: playerID},
 		"paid_gem_balance": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(balance), 10)},
 		"free_gem_balance": &types.AttributeValueMemberN{Value: freeGemBalance},
@@ -69,14 +69,33 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 
 	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String("player_profiles"),
-		Item:      item,
+		Item:      profile,
 	})
 	if err != nil {
-		return gen.UpdateGemPurchase500Response{}, err
+		return gen.UpdateGemPurchase500Response{}, fmt.Errorf("failed to put item from player_profiles table: %w", err)
 	}
 
 	// NOTE: `transaction_histories` テーブルにログを作成
 	transactionID := uuid.New().String()
+
+	transaction := map[string]types.AttributeValue{
+		"transaction_id":    &types.AttributeValueMemberS{Value: transactionID},
+		"timestamp":         &types.AttributeValueMemberS{Value: now},
+		"player_id":         &types.AttributeValueMemberS{Value: playerID},
+		"transaction_type":  &types.AttributeValueMemberS{Value: "paid"}, // or free
+		"gem_id":            &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(request.Body.GemId), 10)},
+		"paid_gem_quantity": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(quantityByGemID), 10)},
+		"free_gem_quantity": &types.AttributeValueMemberN{Value: freeGemBalance},
+		"description":       &types.AttributeValueMemberS{Value: fmt.Sprintf("有償ジェムを%d個購入しました。(%d個セット×%d)", request.Body.Quantity*quantityByGemID, quantityByGemID, request.Body.Quantity)},
+	}
+
+	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
+		TableName: aws.String("transaction_histories"),
+		Item:      transaction,
+	})
+	if err != nil {
+		return gen.UpdateGemPurchase500Response{}, fmt.Errorf("failed to put item from transaction_histories table: %w", err)
+	}
 
 	return gen.UpdateGemPurchase201JSONResponse{
 		Balance:       balance,
