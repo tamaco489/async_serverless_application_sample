@@ -148,7 +148,7 @@ update-gem-purchase:
 		'http://localhost:8081/gem/v2/currencies/purchases' \
 		-H 'accept: application/json' \
 		-H 'Content-Type: application/json' \
-		-d '{"gem_id": 10001010,"quantity": 1000}'
+		-d '{"gem_id": 10001010,"quantity": 10}'
 	@echo
 
 # =================================================================

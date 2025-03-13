@@ -3,12 +3,11 @@
 aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --table-name player_profiles \
     --attribute-definitions \
-        AttributeName=player_id,AttributeType=S \
+        AttributeName=player_id,AttributeType=N \
         AttributeName=paid_gem_balance,AttributeType=N \
         AttributeName=free_gem_balance,AttributeType=N \
         AttributeName=level,AttributeType=N \
-        AttributeName=play_time,AttributeType=N \
-        AttributeName=last_login,AttributeType=S \
+        AttributeName=updated_at,AttributeType=S \
     --key-schema AttributeName=player_id,KeyType=HASH \
     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
     --global-secondary-indexes '[
@@ -40,19 +39,10 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
         "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
       },
       {
-        "IndexName": "PlayTimeIndex",
+        "IndexName": "UpdatedAtIndex",
         "KeySchema": [
           {"AttributeName": "player_id", "KeyType": "HASH"},
-          {"AttributeName": "play_time", "KeyType": "RANGE"}
-        ],
-        "Projection": {"ProjectionType": "ALL"},
-        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
-      },
-      {
-        "IndexName": "LastLoginIndex",
-        "KeySchema": [
-          {"AttributeName": "player_id", "KeyType": "HASH"},
-          {"AttributeName": "last_login", "KeyType": "RANGE"}
+          {"AttributeName": "updated_at", "KeyType": "RANGE"}
         ],
         "Projection": {"ProjectionType": "ALL"},
         "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
