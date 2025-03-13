@@ -5,7 +5,7 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --attribute-definitions \
         AttributeName=transaction_id,AttributeType=S \
         AttributeName=timestamp,AttributeType=N \
-        AttributeName=user_id,AttributeType=S \
+        AttributeName=player_id,AttributeType=S \
         AttributeName=transaction_type,AttributeType=S \
         AttributeName=gem_id,AttributeType=S \
         AttributeName=paid_gem_amount,AttributeType=N \
@@ -15,9 +15,9 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
     --global-secondary-indexes '[
         {
-            "IndexName": "UserTransactionsIndex",
+            "IndexName": "PlayerTransactionsIndex",
             "KeySchema": [
-                {"AttributeName": "user_id", "KeyType": "HASH"},
+                {"AttributeName": "player_id", "KeyType": "HASH"},
                 {"AttributeName": "timestamp", "KeyType": "RANGE"}
             ],
             "Projection": {"ProjectionType": "ALL"},
