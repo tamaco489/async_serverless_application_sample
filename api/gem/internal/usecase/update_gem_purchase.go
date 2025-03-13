@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -16,37 +17,57 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 
 	time.Sleep(750 * time.Millisecond)
 
+	dc := u.dynamoDBClient.Client()
+
 	// 本来はcontextなどからuidを取得する
 	playerID := "27110642"
 
-	// todo: uidを使用して、`player_profiles` から対象のデータを取得
-
-	// todo: データが存在する場合は更新、存在しない場合は新たに作成
-
-	// 本来はマスタを参照し、gem_idに対応するアイテムの個数を取得
-	var quantityByID uint32 = 300
-	paidGemBalance := request.Body.Quantity * quantityByID
-
-	// todo: 既にデータが存在する場合は、元々保有していた個数に加算した状態でテーブルを更新
+	// player_idをキーにしてデータを取得、存在する場合は更新、存在しない場合は新規作成の処理を行う。
+	getResult, err := dc.GetItem(ctx, &dynamodb.GetItemInput{
+		TableName: aws.String("player_profiles"),
+		Key: map[string]types.AttributeValue{
+			"player_id": &types.AttributeValueMemberS{Value: playerID},
+		},
+	})
+	if err != nil {
+		return gen.UpdateGemPurchase500Response{}, fmt.Errorf("failed to get item from player_profiles table: %w", err)
+	}
 
 	now := time.Now().Format(time.RFC3339)
 
-	// プレイ時間も固定、35時間を分単位で表現
-	playTime := 35 * 60
+	// 本来はマスタを参照し、gem_idに対応するアイテムの個数を取得するが、現時点ではget_id=10001010は30個のジェムとしてMock的に扱う
+	var quantityByID uint32 = 30
+	balance := request.Body.Quantity * quantityByID
 
-	item := map[string]types.AttributeValue{
-		"player_id":         &types.AttributeValueMemberS{Value: playerID},
-		"paid_gem_balance":  &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(paidGemBalance), 10)},
-		"free_gem_balance":  &types.AttributeValueMemberN{Value: "0"}, // 有償通貨なので0固定
-		"level":             &types.AttributeValueMemberN{Value: "1"}, // ユーザのレベルは一定の条件に応じて変動、一旦固定
-		"play_time_minutes": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(playTime), 10)},
-		"last_login":        &types.AttributeValueMemberS{Value: now},
-		"created_at":        &types.AttributeValueMemberS{Value: now},
-		"updated_at":        &types.AttributeValueMemberS{Value: now},
+	// 作成日時の初期値は現在時刻とし、データが存在していた場合はその値を設定して更新
+	createdAt := attributeValueToString(&types.AttributeValueMemberS{Value: now})
+
+	freeGemBalance, level := "0", "1"
+
+	// NOTE: 既にデータが存在する場合は、元々保有していた個数に加算した状態で更新
+	if len(getResult.Item) != 0 {
+		item := getResult.Item
+		existingBalance, ok := item["paid_gem_balance"].(*types.AttributeValueMemberN)
+		if ok {
+			balanceInt, _ := strconv.ParseUint(existingBalance.Value, 10, 64)
+			balance += uint32(balanceInt)
+		}
+
+		freeGemBalance = attributeValueToString(item["free_gem_balance"])
+		level = attributeValueToString(item["level"])
+		createdAt = attributeValueToString(item["created_at"])
 	}
 
-	dc := u.dynamoDBClient
-	_, err := dc.Client().PutItem(ctx, &dynamodb.PutItemInput{
+	item := map[string]types.AttributeValue{
+		"player_id":        &types.AttributeValueMemberS{Value: playerID},
+		"paid_gem_balance": &types.AttributeValueMemberN{Value: strconv.FormatUint(uint64(balance), 10)},
+		"free_gem_balance": &types.AttributeValueMemberN{Value: freeGemBalance},
+		"level":            &types.AttributeValueMemberN{Value: level},
+		"created_at":       &types.AttributeValueMemberS{Value: createdAt},
+		"updated_at":       &types.AttributeValueMemberS{Value: now},
+	}
+
+	_, err = dc.PutItem(ctx, &dynamodb.PutItemInput{
 		TableName: aws.String("player_profiles"),
 		Item:      item,
 	})
@@ -58,7 +79,23 @@ func (u *gemUseCase) UpdateGemPurchase(ctx *gin.Context, request gen.UpdateGemPu
 	transactionID := uuid.New().String()
 
 	return gen.UpdateGemPurchase201JSONResponse{
-		Balance:       100000,
+		Balance:       balance,
 		TransactionId: transactionID,
 	}, nil
+}
+
+// attributeValueToString: 型`types.AttributeValue`を受け取りString型に変換する
+//
+// 文字列型、数値型、バイト配列型のみを受け付ける。左記以外の型の場合は空文字を返す
+func attributeValueToString(av types.AttributeValue) string {
+	switch v := av.(type) {
+	case *types.AttributeValueMemberS:
+		return v.Value
+	case *types.AttributeValueMemberN:
+		return v.Value
+	case *types.AttributeValueMemberB:
+		return string(v.Value)
+	default:
+		return ""
+	}
 }
