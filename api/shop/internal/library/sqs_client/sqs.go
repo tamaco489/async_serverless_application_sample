@@ -25,7 +25,7 @@ func NewSQSClient(cfg aws.Config, env string) (*SQSClient, error) {
 			o.BaseEndpoint = aws.String("http://localhost:4566")
 		})
 
-	case "stg":
+	case "stg", "prd":
 		client = sqs.NewFromConfig(cfg)
 
 	default:
