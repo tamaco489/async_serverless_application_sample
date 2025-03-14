@@ -36,7 +36,9 @@ resource "aws_lambda_event_source_mapping" "dynamodb_stream" {
   enabled       = true
   function_name = aws_lambda_function.slack_message_batch.arn
 
-  # NOTE: 注意点として、ここで指定するARNは対象のテーブルのARNではなく、DynamoDB StreamのARNを指定する必要がある。
+  # NOTE: 注意点:
+  # ここで指定するARNは対象のテーブルのARNではなく、DynamoDB StreamのARNを指定する必要がある。
+  # また、StreamのARNはタイムスタンプを持っているため、Stream自身に更新があった場合はARNに差分が出てしまう。
   event_source_arn = data.terraform_remote_state.dynamodb.outputs.transaction_histories.stream_arn
 
   # DynamoDB Streams では、テーブルの変更履歴が 「shard」 と呼ばれるストリームに順番に記録されます。
