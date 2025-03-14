@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/tamaco489/async_serverless_application_sample/batch/slack_message/internal/configuration"
+	"github.com/tamaco489/async_serverless_application_sample/batch/slack_message/internal/library/slack"
 )
 
 type Jobber interface {
@@ -14,10 +15,11 @@ type Jobber interface {
 
 var _ Jobber = (*Job)(nil)
 
-type Job struct{}
+type Job struct{ slackClient slack.ISlackClient }
 
 func NewJob(cfg configuration.Config) (*Job, error) {
-	return &Job{}, nil
+	slackClient := slack.NewSlackClient(cfg.Slack.WebHookURL)
+	return &Job{slackClient: slackClient}, nil
 }
 
 type SendSlackMessagePurchaseStreamEvent struct {
