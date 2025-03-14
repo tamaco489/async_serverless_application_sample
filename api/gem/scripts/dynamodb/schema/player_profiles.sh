@@ -2,14 +2,14 @@
 
 aws --endpoint-url http://localhost:8000 dynamodb create-table \
     --table-name player_profiles \
+    --billing-mode PAY_PER_REQUEST \
     --attribute-definitions \
-        AttributeName=player_id,AttributeType=N \
-        AttributeName=paid_gem_balance,AttributeType=N \
-        AttributeName=free_gem_balance,AttributeType=N \
-        AttributeName=level,AttributeType=N \
-        AttributeName=updated_at,AttributeType=S \
+      AttributeName=player_id,AttributeType=N \
+      AttributeName=paid_gem_balance,AttributeType=N \
+      AttributeName=free_gem_balance,AttributeType=N \
+      AttributeName=level,AttributeType=N \
+      AttributeName=updated_at,AttributeType=S \
     --key-schema AttributeName=player_id,KeyType=HASH \
-    --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
     --global-secondary-indexes '[
       {
         "IndexName": "PaidGemBalanceIndex",
@@ -17,8 +17,7 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
           {"AttributeName": "player_id", "KeyType": "HASH"},
           {"AttributeName": "paid_gem_balance", "KeyType": "RANGE"}
         ],
-        "Projection": {"ProjectionType": "ALL"},
-        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+        "Projection": {"ProjectionType": "ALL"}
       },
       {
         "IndexName": "FreeGemBalanceIndex",
@@ -26,8 +25,7 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
           {"AttributeName": "player_id", "KeyType": "HASH"},
           {"AttributeName": "free_gem_balance", "KeyType": "RANGE"}
         ],
-        "Projection": {"ProjectionType": "ALL"},
-        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+        "Projection": {"ProjectionType": "ALL"}
       },
       {
         "IndexName": "LevelIndex",
@@ -35,8 +33,7 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
           {"AttributeName": "player_id", "KeyType": "HASH"},
           {"AttributeName": "level", "KeyType": "RANGE"}
         ],
-        "Projection": {"ProjectionType": "ALL"},
-        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+        "Projection": {"ProjectionType": "ALL"}
       },
       {
         "IndexName": "UpdatedAtIndex",
@@ -44,7 +41,6 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
           {"AttributeName": "player_id", "KeyType": "HASH"},
           {"AttributeName": "updated_at", "KeyType": "RANGE"}
         ],
-        "Projection": {"ProjectionType": "ALL"},
-        "ProvisionedThroughput": {"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
+        "Projection": {"ProjectionType": "ALL"}
       }
     ]' | jq .
