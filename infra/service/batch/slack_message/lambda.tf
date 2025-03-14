@@ -39,6 +39,8 @@ resource "aws_lambda_event_source_mapping" "dynamodb_stream" {
   # NOTE: 注意点:
   # ここで指定するARNは対象のテーブルのARNではなく、DynamoDB StreamのARNを指定する必要がある。
   # また、StreamのARNはタイムスタンプを持っているため、Stream自身に更新があった場合はARNに差分が出てしまう。
+  # 例) arn:aws:dynamodb:ap-northeast-1:<aws-account-id>:table/<table-name>/stream/2025-03-14T12:39:56.231
+  # `arn:aws:dynamodb:ap-northeast-1:<aws-account-id>:table/<table-name>/stream/*` といったワイルドカード指定もできないため、streamに変更があった場合は参照しているリソースも更新する必要がある。
   event_source_arn = data.terraform_remote_state.dynamodb.outputs.transaction_histories.stream_arn
 
   # DynamoDB Streams では、テーブルの変更履歴が 「shard」 と呼ばれるストリームに順番に記録されます。

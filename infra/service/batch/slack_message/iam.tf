@@ -40,8 +40,9 @@ data "aws_iam_policy_document" "slack_message_batch_policy" {
     resources = [
       # NOTE: 注意点:
       # ここで指定するARNは対象のテーブルのARNではなく、DynamoDB StreamのARNを指定する必要がある。
-      # また、StreamのARNはタイムスタンプを持っているため、Stream自身に更新があった場合はARNに差分が出てしまう。
-      data.terraform_remote_state.dynamodb.outputs.transaction_histories.stream_arn
+      # また、StreamのARNはタイムスタンプを持っているため、Stream自身に更新があった場合はARNに差分が出てしまうためワイルドカードを使用してstreamに変更があった場合でも差分が出ないようにする。
+      # 例) arn:aws:dynamodb:ap-northeast-1:<aws-account-id>:table/<table-name>/stream/2025-03-14T12:39:56.231
+      "${data.terraform_remote_state.dynamodb.outputs.transaction_histories.arn}/stream/*"
     ]
   }
 }
