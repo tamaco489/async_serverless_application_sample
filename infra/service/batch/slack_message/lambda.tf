@@ -72,4 +72,13 @@ resource "aws_lambda_event_source_mapping" "dynamodb_stream" {
   # 注意点として、shardを増やした場合順序が担保されないため、決済処理のようなAの処理が終わってBの処理を行う等の順序性を考慮するロジックの場合はシリアルに処理するのが一般的。
   # このプロダクトは検証利用を目的としているため、デフォルト値を設定しています。
   parallelization_factor = 1
+
+  # Lambda の一時的なエラーや、DynamoDB のレコード構造の変更が原因で失敗が発生することがあるため、DLQ（デッドレターキュー）に記録して調査できるようにする。
+  # `destination_arn` には、失敗データを送信する SQS キューの ARN を指定しています。
+  # DOC: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_event_source_mapping.html#:~:text=destination_config%3A%20%2D%20(Optional)%20An%20Amazon%20SQS%20queue%2C%20Amazon%20SNS%20topic%20or%20Amazon%20S3%20bucket%20(only%20available%20for%20Kafka%20sources)%20destination%20for%20failed%20records.%20Only%20available%20for%20stream%20sources%20(DynamoDB%20and%20Kinesis)%20and%20Kafka%20sources%20(Amazon%20MSK%20and%20Self%2Dmanaged%20Apache%20Kafka).%20Detailed%20below.
+  destination_config {
+    on_failure {
+      destination_arn = data.terraform_remote_state.sqs.outputs.slack_message_dlq.arn
+    }
+  }
 }
