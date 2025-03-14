@@ -13,3 +13,11 @@ data "terraform_remote_state" "network" {
     key    = "network/terraform.tfstate"
   }
 }
+
+data "terraform_remote_state" "dynamodb" {
+  backend = "s3"
+  config = {
+    bucket = "${var.env}-async-serverless-application-tfstate"
+    key    = "dynamodb/terraform.tfstate"
+  }
+}
