@@ -36,8 +36,8 @@ data "aws_iam_policy_document" "gem_api_dynamodb_policy" {
       "dynamodb:PutItem"
     ]
     resources = [
-      "${aws_dynamodb_table.player_profiles.arn}",
-      "${aws_dynamodb_table.transaction_histories.arn}",
+      data.terraform_remote_state.dynamodb.outputs.player_profiles.arn,
+      data.terraform_remote_state.dynamodb.outputs.transaction_histories.arn
     ]
   }
 }

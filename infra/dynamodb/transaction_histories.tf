@@ -1,74 +1,3 @@
-# =================================================================
-# player_profiles
-# =================================================================
-resource "aws_dynamodb_table" "player_profiles" {
-  name         = "player_profiles"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "player_id"
-
-  attribute {
-    name = "player_id"
-    type = "N"
-  }
-
-  attribute {
-    name = "paid_gem_balance"
-    type = "N"
-  }
-
-  attribute {
-    name = "free_gem_balance"
-    type = "N"
-  }
-
-  attribute {
-    name = "level"
-    type = "N"
-  }
-
-  attribute {
-    name = "updated_at"
-    type = "S"
-  }
-
-  global_secondary_index {
-    name            = "PaidGemBalanceIndex"
-    hash_key        = "player_id"
-    range_key       = "paid_gem_balance"
-    projection_type = "ALL"
-  }
-
-  global_secondary_index {
-    name            = "FreeGemBalanceIndex"
-    hash_key        = "player_id"
-    range_key       = "free_gem_balance"
-    projection_type = "ALL"
-  }
-
-  global_secondary_index {
-    name            = "LevelIndex"
-    hash_key        = "player_id"
-    range_key       = "level"
-    projection_type = "ALL"
-  }
-
-  global_secondary_index {
-    name            = "UpdatedAtIndex"
-    hash_key        = "player_id"
-    range_key       = "updated_at"
-    projection_type = "ALL"
-  }
-
-  tags = {
-    Env     = var.env
-    Project = var.project
-    Name    = "${var.env}-${var.project}-player-profiles"
-  }
-}
-
-# =================================================================
-# transaction_histories
-# =================================================================
 resource "aws_dynamodb_table" "transaction_histories" {
   name         = "transaction_histories"
   billing_mode = "PAY_PER_REQUEST"
@@ -151,10 +80,11 @@ resource "aws_dynamodb_table" "transaction_histories" {
     projection_type = "ALL"
   }
 
+  stream_enabled   = true
+  stream_view_type = "NEW_AND_OLD_IMAGES"
+
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${var.env}-${var.project}-transaction-histories"
   }
 }
-
