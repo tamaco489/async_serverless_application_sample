@@ -15,4 +15,5 @@ locals {
   shop_api                = "${var.env}-shop-api"
   gem_api                 = "${var.env}-gem-api"
   push_notification_batch = "${var.env}-push-notification-batch"
+  slack_message_batch     = "${var.env}-slack-message-batch"
 }
