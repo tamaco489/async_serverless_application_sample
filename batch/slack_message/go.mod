@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.9
+	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.35.2
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/slack-go/slack v0.16.0
 )
