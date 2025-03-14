@@ -1,6 +1,7 @@
 resource "aws_dynamodb_table" "player_profiles" {
   name         = "player_profiles"
   billing_mode = "PAY_PER_REQUEST"
+  table_class  = "STANDARD"
   hash_key     = "player_id"
 
   attribute {

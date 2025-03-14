@@ -8,8 +8,9 @@ output "player_profiles" {
 
 output "transaction_histories" {
   value = {
-    id   = aws_dynamodb_table.transaction_histories.id
-    arn  = aws_dynamodb_table.transaction_histories.arn
-    name = aws_dynamodb_table.transaction_histories.name
+    id         = aws_dynamodb_table.transaction_histories.id
+    arn        = aws_dynamodb_table.transaction_histories.arn
+    name       = aws_dynamodb_table.transaction_histories.name
+    stream_arn = aws_dynamodb_table.transaction_histories.stream_arn
   }
 }

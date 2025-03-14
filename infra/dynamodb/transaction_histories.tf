@@ -1,9 +1,9 @@
 resource "aws_dynamodb_table" "transaction_histories" {
   name         = "transaction_histories"
   billing_mode = "PAY_PER_REQUEST"
-
-  hash_key  = "player_id"
-  range_key = "timestamp"
+  table_class  = "STANDARD"
+  hash_key     = "player_id"
+  range_key    = "timestamp"
 
   attribute {
     name = "transaction_id"
@@ -81,7 +81,7 @@ resource "aws_dynamodb_table" "transaction_histories" {
   }
 
   stream_enabled   = true
-  stream_view_type = "NEW_AND_OLD_IMAGES"
+  stream_view_type = "NEW_IMAGE"
 
   tags = {
     Env     = var.env
