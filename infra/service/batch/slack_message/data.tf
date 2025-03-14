@@ -29,3 +29,15 @@ data "terraform_remote_state" "sqs" {
     key    = "sqs/slack_message/terraform.tfstate"
   }
 }
+
+data "terraform_remote_state" "credential_slack_message_api" {
+  backend = "s3"
+  config = {
+    bucket = "${var.env}-async-serverless-application-tfstate"
+    key    = "credential/slack_message_api/terraform.tfstate"
+  }
+}
+
+data "aws_kms_key" "secretsmanager" {
+  key_id = "alias/aws/secretsmanager"
+}
