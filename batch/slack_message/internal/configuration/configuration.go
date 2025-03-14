@@ -13,6 +13,7 @@ var globalConfig Config
 type Config struct {
 	Env         string `envconfig:"ENV" default:"dev"`
 	ServiceName string `envconfig:"SERVICE_NAME" default:"slack-message"`
+	Slack       struct{ WebHookURL string }
 	AWSConfig   aws.Config
 }
 
