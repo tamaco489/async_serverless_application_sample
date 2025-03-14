@@ -21,3 +21,11 @@ data "terraform_remote_state" "dynamodb" {
     key    = "dynamodb/terraform.tfstate"
   }
 }
+
+data "terraform_remote_state" "sqs" {
+  backend = "s3"
+  config = {
+    bucket = "${var.env}-async-serverless-application-tfstate"
+    key    = "sqs/slack_message/terraform.tfstate"
+  }
+}
