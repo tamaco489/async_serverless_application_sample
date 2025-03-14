@@ -9,10 +9,12 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
         AttributeName=gem_id,AttributeType=N \
         AttributeName=paid_gem_quantity,AttributeType=N \
         AttributeName=free_gem_quantity,AttributeType=N \
-    --key-schema AttributeName=transaction_id,KeyType=HASH \
-    --global-secondary-indexes '[
+    --key-schema \
+        AttributeName=player_id,KeyType=HASH \
+        AttributeName=timestamp,KeyType=RANGE \
+    --local-secondary-indexes '[
         {
-            "IndexName": "PlayerTransactionsIndex",
+            "IndexName": "PlayerTimestampIndex",
             "KeySchema": [
                 {"AttributeName": "player_id", "KeyType": "HASH"},
                 {"AttributeName": "timestamp", "KeyType": "RANGE"}
@@ -20,18 +22,28 @@ aws --endpoint-url http://localhost:8000 dynamodb create-table \
             "Projection": {"ProjectionType": "ALL"}
         },
         {
-            "IndexName": "TransactionTypeIndex",
+            "IndexName": "PlayerTransactionTypeIndex",
             "KeySchema": [
                 {"AttributeName": "player_id", "KeyType": "HASH"},
                 {"AttributeName": "transaction_type", "KeyType": "RANGE"}
+            ],
+            "Projection": {"ProjectionType": "ALL"}
+        }
+    ]' \
+    --global-secondary-indexes '[
+        {
+            "IndexName": "TransactionIDIndex",
+            "KeySchema": [
+                {"AttributeName": "transaction_id", "KeyType": "HASH"},
+                {"AttributeName": "player_id", "KeyType": "RANGE"}
             ],
             "Projection": {"ProjectionType": "ALL"}
         },
         {
             "IndexName": "GemTransactionsIndex",
             "KeySchema": [
-                {"AttributeName": "player_id", "KeyType": "HASH"},
-                {"AttributeName": "gem_id", "KeyType": "RANGE"}
+                {"AttributeName": "gem_id", "KeyType": "HASH"},
+                {"AttributeName": "player_id", "KeyType": "RANGE"}
             ],
             "Projection": {"ProjectionType": "ALL"}
         },
