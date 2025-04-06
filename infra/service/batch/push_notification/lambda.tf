@@ -10,7 +10,7 @@ resource "aws_lambda_function" "push_notification_batch" {
   vpc_config {
     ipv6_allowed_for_dual_stack = false
     security_group_ids          = [aws_security_group.push_notification_batch.id]
-    subnet_ids                = data.terraform_remote_state.network.outputs.vpc.private_subnet_ids
+    subnet_ids                  = data.terraform_remote_state.network.outputs.vpc.private_subnet_ids
   }
 
   lifecycle {
@@ -42,8 +42,11 @@ resource "aws_lambda_event_source_mapping" "push_notification_batch" {
 
   # Lambdaは20秒間待機し、その間に最大5件のメッセージを集める
   # 待機時間が経過する前に5件集まった場合即座に処理を開始するが、20秒経過したら集まったメッセージ数に関わらず処理が始まる
-  maximum_batching_window_in_seconds = 20
-  batch_size                         = 5
+  batch_size = 5
+  # maximum_batching_window_in_seconds = 20
+
+  # NOTE: `maximum_batching_window_in_seconds` はキューのタイプを標準キューで設定している場合にのみ設定が可能、FIFOにしている場合は設定不可
+  # DOC: https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/services-sqs-configure.html
 
   # 送信されるメッセージにおけるフィルター処理を定義することができる
   # DLQへの受け渡しの挙動を検証したいためフィルタリング設定は無効化する
