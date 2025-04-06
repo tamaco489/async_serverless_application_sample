@@ -1,17 +1,22 @@
 resource "aws_sqs_queue" "push_notification_queue" {
-  name = "${local.fqn}-queue"
+  # NOTE: FIFO Queue として扱う場合、名前の接尾辞に `xxxxx.fifo` という名称を設定しなければならない
+  # DOC: https://docs.aws.amazon.com/ja_jp/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queue-message-identifiers.html
+  name = "${local.fqn}-queue.fifo"
 
-  # 標準Queueとして定義（順序を考慮しない）
-  fifo_queue = false
+  # FIFO Queue として定義（順序、及び重複制御を有効にする）
+  fifo_queue = true
+
+  # content-basedな重複排除を有効化、明示的な MessageDeduplicationId の指定を省略可能にする（本文のSHA-256がIDとして扱われる）
+  content_based_deduplication = true
 
   # 最大メッセージサイズ
-  max_message_size = local.queue_max_message_size
+  max_message_size = 256 * 1024 # 256 KiB
 
   # キューの可視性タイムアウト。秒単位で設定。（指定した期間中は他のコンシューマーはキューを参照することができない）
-  visibility_timeout_seconds = local.queue_visibility_timeout_seconds
+  visibility_timeout_seconds = 5 * 60 # 5min timeout
 
   # メッセージの保持時間、秒単位で設定
-  message_retention_seconds = local.queue_message_retention_seconds
+  message_retention_seconds = 2 * 24 * 60 * 60 # 2day
 
   # キュー内の全メッセージの配送を遅延させる時間、秒単位で設定。（30秒で設定した場合、キューに送信してもLambda30秒間はこのキューを見ることができない。※0の場合は即時配信となる）
   delay_seconds = 0
@@ -27,23 +32,23 @@ resource "aws_sqs_queue" "push_notification_queue" {
     deadLetterTargetArn = aws_sqs_queue.push_notification_dlq.arn
 
     # リトライ回数の設定。メッセージが繰り返し処理に失敗する場合に、無限ループを防ぐ
-    maxReceiveCount = local.max_receive_count
+    maxReceiveCount = 3
   })
 
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${local.fqn}-queue"
+    Name    = "${local.fqn}-queue.fifo"
   }
 }
 
 # DLQの設定
 resource "aws_sqs_queue" "push_notification_dlq" {
-  name                       = "${local.fqn}-dlq"
-  fifo_queue                 = false
-  max_message_size           = local.dlq_max_message_size
-  visibility_timeout_seconds = local.dlq_visibility_timeout_seconds
-  message_retention_seconds  = local.dlq_message_retention_seconds
+  name                       = "${local.fqn}-dlq.fifo" # NOTE: SQSの RedrivePolicy に指定された DLQ のタイプと一致させなければならない
+  fifo_queue                 = true
+  max_message_size           = 256 * 1024       # 256 KiB
+  visibility_timeout_seconds = 5 * 60           # 5min timeout
+  message_retention_seconds  = 1 * 24 * 60 * 60 # 1day
   delay_seconds              = 0
   receive_wait_time_seconds  = 0
   sqs_managed_sse_enabled    = false
@@ -51,6 +56,6 @@ resource "aws_sqs_queue" "push_notification_dlq" {
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${local.fqn}-dlq"
+    Name    = "${local.fqn}-dlq.fifo"
   }
 }

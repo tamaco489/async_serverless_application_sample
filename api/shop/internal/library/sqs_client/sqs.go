@@ -46,8 +46,10 @@ func (c *SQSClient) SendPurchaseMessage(ctx context.Context, queueURL string, ms
 	}
 
 	_, err = c.Client.SendMessage(ctx, &sqs.SendMessageInput{
-		QueueUrl:    aws.String(queueURL),
-		MessageBody: aws.String(string(msgBody)),
+		QueueUrl:       aws.String(queueURL),
+		MessageBody:    aws.String(string(msgBody)),
+		MessageGroupId: aws.String(msg.GetUIDString()), // NOTE: FIFOキューの場合は必須
+		// MessageDeduplicationId: aws.String("deduplicationId"), // NOTE: FIFOキューの場合、リソース作成時に `content_based_deduplication = true` を指定していない場合は必須
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send message to SQS: %w", err)
