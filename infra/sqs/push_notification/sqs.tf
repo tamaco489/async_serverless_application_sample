@@ -6,6 +6,9 @@ resource "aws_sqs_queue" "push_notification_queue" {
   # FIFO Queue として定義（順序、及び重複制御を有効にする）
   fifo_queue = true
 
+  # content-basedな重複排除を有効化、明示的な MessageDeduplicationId の指定を省略可能にする（本文のSHA-256がIDとして扱われる）
+  content_based_deduplication = true
+
   # 最大メッセージサイズ
   max_message_size = 256 * 1024 # 256 KiB
 
