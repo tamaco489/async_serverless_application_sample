@@ -81,10 +81,10 @@ data "aws_iam_policy_document" "shop_api_secrets_manager_policy" {
 resource "aws_iam_policy" "shop_api_secrets_manager_policy" {
   name        = "${local.fqn}-api-secrets-manager-policy"
   description = "Allows Lambda to access Secrets Manager secrets"
-  policy = data.terraform_remote_state.credential_line_message_api.outputs.line_message_api.json
+  policy      = data.aws_iam_policy_document.shop_api_secrets_manager_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "shop_api_secrets_manager_role" {
-  role = aws_iam_role.shop_api.name
+  role       = aws_iam_role.shop_api.name
   policy_arn = aws_iam_policy.shop_api_secrets_manager_policy.arn
 }

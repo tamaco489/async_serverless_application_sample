@@ -12,7 +12,7 @@ resource "aws_security_group" "shop_api" {
 
 resource "aws_vpc_security_group_egress_rule" "shop_api_egress" {
   security_group_id = aws_security_group.shop_api.id
-  description       = "Allow Lambda to access external resources (e.g., RDS, DynamoDB, APIs)"
+  description       = "Allow Lambda to access external resources (e.g. RDS, DynamoDB, APIs)"
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
 }
