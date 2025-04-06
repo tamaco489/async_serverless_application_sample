@@ -8,13 +8,14 @@ resource "aws_internet_gateway" "async_serverless_app" {
   }
 }
 
-resource "aws_nat_gateway" "async_serverless_app" {
-  allocation_id = aws_eip.nat_gw.id
-  subnet_id     = aws_subnet.public_subnet["a"].id
+# NOTE: 料金高いのでプライベート通信は行わない
+# resource "aws_nat_gateway" "async_serverless_app" {
+#   allocation_id = aws_eip.nat_gw.id
+#   subnet_id     = aws_subnet.public_subnet["a"].id
 
-  tags = {
-    Env     = var.env
-    Project = var.project
-    Name    = "${var.env}-${var.project}-nat-gw"
-  }
-}
+#   tags = {
+#     Env     = var.env
+#     Project = var.project
+#     Name    = "${var.env}-${var.project}-nat-gw"
+#   }
+# }

@@ -10,7 +10,8 @@ resource "aws_lambda_function" "push_notification_batch" {
   vpc_config {
     ipv6_allowed_for_dual_stack = false
     security_group_ids          = [aws_security_group.push_notification_batch.id]
-    subnet_ids                  = data.terraform_remote_state.network.outputs.vpc.private_subnet_ids
+    subnet_ids                  = data.terraform_remote_state.network.outputs.vpc.public_subnet_ids
+    # subnet_ids                = data.terraform_remote_state.network.outputs.vpc.private_subnet_ids # NOTE: NAT使いたくないのでプライベートサブネットは使わない
   }
 
   lifecycle {

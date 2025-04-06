@@ -4,13 +4,14 @@ resource "aws_lambda_function" "shop_api" {
   role          = aws_iam_role.shop_api.arn
   package_type  = "Image"
   image_uri     = "${data.terraform_remote_state.ecr.outputs.shop_api.url}:shop_api_v0.0.0"
-  timeout       = 20
+  timeout       = 60
   memory_size   = 128
 
   vpc_config {
     ipv6_allowed_for_dual_stack = false
     security_group_ids          = [aws_security_group.shop_api.id]
-    subnet_ids                  = data.terraform_remote_state.network.outputs.vpc.private_subnet_ids
+    subnet_ids                  = data.terraform_remote_state.network.outputs.vpc.public_subnet_ids
+    # subnet_ids                = data.terraform_remote_state.network.outputs.vpc.private_subnet_ids # NOTE: NAT使いたくないのでプライベートサブネットは使わない
   }
 
   lifecycle {
