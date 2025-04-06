@@ -25,6 +25,9 @@ func PushNotificationHandler(job usecase.Job) SQSEventJob {
 		*/
 
 		for _, record := range sqsEvent.Records {
+
+			slog.InfoContext(ctx, "push notification handler process started", slog.Any("record body", record.Body))
+
 			var message models.PurchaseQueueMessage
 			if err := json.Unmarshal([]byte(record.Body), &message); err != nil {
 				slog.ErrorContext(ctx, "failed to unmarshal message", slog.String("error", err.Error()))
