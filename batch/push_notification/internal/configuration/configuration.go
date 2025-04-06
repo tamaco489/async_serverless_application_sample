@@ -14,12 +14,14 @@ var globalConfig Config
 type Config struct {
 	Env            string `envconfig:"ENV" default:"dev"`
 	ServiceName    string `envconfig:"SERVICE_NAME" default:"push-notification"`
-	LineMessageAPI struct {
-		ChannelSecret      string `json:"channel_secret"`
-		ChannelAccessToken string `json:"channel_access_token"`
-		UserID             string `json:"user_id"`
-	}
-	AWSConfig aws.Config
+	LineMessageAPI LineMessageAPISecret
+	AWSConfig      aws.Config
+}
+
+type LineMessageAPISecret struct {
+	ChannelSecret      string `json:"channel_secret"`
+	ChannelAccessToken string `json:"channel_access_token"`
+	UserID             string `json:"user_id"`
 }
 
 func Get() Config { return globalConfig }
