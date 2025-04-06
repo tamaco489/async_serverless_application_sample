@@ -1,8 +1,10 @@
 resource "aws_sqs_queue" "push_notification_queue" {
-  name = "${local.fqn}-queue"
+  # NOTE: FIFO Queue として扱う場合、名前の接尾辞に `xxxxx.fifo` という名称を設定しなければならない
+  # DOC: https://docs.aws.amazon.com/ja_jp/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-fifo-queue-message-identifiers.html
+  name = "${local.fqn}-queue.fifo"
 
-  # 標準Queueとして定義（順序を考慮しない）
-  fifo_queue = false
+  # FIFO Queue として定義（順序、及び重複制御を有効にする）
+  fifo_queue = true
 
   # 最大メッセージサイズ
   max_message_size = 256 * 1024 # 256 KiB
@@ -33,14 +35,14 @@ resource "aws_sqs_queue" "push_notification_queue" {
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${local.fqn}-queue"
+    Name    = "${local.fqn}-queue.fifo"
   }
 }
 
 # DLQの設定
 resource "aws_sqs_queue" "push_notification_dlq" {
-  name                       = "${local.fqn}-dlq"
-  fifo_queue                 = false
+  name                       = "${local.fqn}-dlq.fifo" # NOTE: SQSの RedrivePolicy に指定された DLQ のタイプと一致させなければならない
+  fifo_queue                 = true
   max_message_size           = 256 * 1024       # 256 KiB
   visibility_timeout_seconds = 5 * 60           # 5min timeout
   message_retention_seconds  = 1 * 24 * 60 * 60 # 1day
@@ -51,6 +53,6 @@ resource "aws_sqs_queue" "push_notification_dlq" {
   tags = {
     Env     = var.env
     Project = var.project
-    Name    = "${local.fqn}-dlq"
+    Name    = "${local.fqn}-dlq.fifo"
   }
 }
