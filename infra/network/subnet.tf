@@ -13,18 +13,17 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-# NOTE: NAT使いたくないのでプライベートサブネットは使わない
-# resource "aws_subnet" "private_subnet" {
-#   vpc_id                  = aws_vpc.async_serverless_app.id
-#   for_each                = var.private_subnet
-#   cidr_block              = each.value["cidr"]
-#   availability_zone       = "${var.region}${each.value["az"]}"
-#   map_public_ip_on_launch = false
+resource "aws_subnet" "private_subnet" {
+  vpc_id                  = aws_vpc.async_serverless_app.id
+  for_each                = var.private_subnet
+  cidr_block              = each.value["cidr"]
+  availability_zone       = "${var.region}${each.value["az"]}"
+  map_public_ip_on_launch = false
 
-#   tags = {
-#     Env     = var.env
-#     Project = var.project
-#     Name    = "${var.env}-${var.project}-private-subnet-${each.value["az"]}"
-#     AZ      = "${each.value["az"]}"
-#   }
-# }
+  tags = {
+    Env     = var.env
+    Project = var.project
+    Name    = "${var.env}-${var.project}-private-subnet-${each.value["az"]}"
+    AZ      = "${each.value["az"]}"
+  }
+}
