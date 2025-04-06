@@ -11,7 +11,7 @@ import (
 )
 
 func (j *Job) SendPushNotificationPurchaseCompleted(ctx context.Context, message models.PurchaseQueueMessage) error {
-	slog.InfoContext(ctx, "send push notification purchase completed...")
+	slog.InfoContext(ctx, "send push notification purchase completed usecase processing")
 
 	// push通知送信したいけどアプリないのでLINE Message APIを利用する。
 

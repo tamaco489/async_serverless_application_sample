@@ -2,6 +2,7 @@ package sqs_client
 
 import (
 	"math/rand/v2"
+	"strconv"
 )
 
 type PurchaseStatus string
@@ -33,4 +34,9 @@ func GetRandomPurchaseStatus() PurchaseStatus {
 
 	randomIndex := rand.IntN(len(statuses))
 	return statuses[randomIndex]
+}
+
+// PurchaseQueueMessage: uint64型のuser_idをstring型に変換するメソッド
+func (pqm *PurchaseQueueMessage) GetUIDString() string {
+	return strconv.FormatUint(pqm.UserID, 10)
 }
